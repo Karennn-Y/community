@@ -9,10 +9,12 @@
     <h1>회원 활성화</h1>
     <div th:if="${result eq true}">
       <p>회원님의 계정이 활성화 되었습니다.</p>
+      <a href="/user/login">로그인</a>
     </div>
 
     <div th:if="${result eq false}">
       <p>회원님의 계정 활성화에 실패하였습니다.</p>
+      <a href="/">메인으로 이동</a>
     </div>
 
 

@@ -1,5 +1,6 @@
 package com.project.community.user.controller;
 
+import com.project.community.user.model.ResetPasswordInput;
 import com.project.community.user.model.UserInput;
 import com.project.community.user.repository.UserRepository;
 import com.project.community.user.service.UserService;
@@ -22,6 +23,24 @@ public class UserController {
 	@RequestMapping("/user/login")
 	public String login() {
 		return "user/login";
+	}
+
+	@GetMapping("/user/find/password")
+	public String findPassword() {
+		return "user/find_password";
+	}
+
+	@PostMapping("/user/find/password")
+	public String findPasswordSubmit(Model model, ResetPasswordInput parameter) {
+
+		boolean result = false;
+		try {
+			result = userService.sendResetPassword(parameter);
+		} catch (Exception e) {
+		}
+		model.addAttribute("result", result);
+
+		return "user/find_password_result";
 	}
 
 	@GetMapping("/user/register")
@@ -51,5 +70,32 @@ public class UserController {
 	@GetMapping("/user/info")
 	public String userInfo() {
 		return "user/info";
+	}
+
+	@GetMapping("/user/reset/password")
+	public String resetPassword(Model model, HttpServletRequest request) {
+
+		String uuid = request.getParameter("id");
+
+		boolean result = userService.checkResetPassword(uuid);
+
+		model.addAttribute("result", result);
+
+		return "user/reset_password";
+	}
+
+	@PostMapping("/user/reset/password")
+	public String resetPasswordSubmit(Model model, ResetPasswordInput parameter) {
+
+		boolean result = false;
+		try {
+			result = userService.resetPassword(parameter.getId(), parameter.getPassword());
+		} catch (Exception e) {
+		}
+
+		model.addAttribute("result", result);
+
+
+		return "user/reset_password_result";
 	}
 }
