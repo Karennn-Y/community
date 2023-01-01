@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequiredArgsConstructor
 @Controller
@@ -17,6 +18,11 @@ public class UserController {
 
 	private final UserRepository userRepository;
 	private final UserService userService;
+
+	@RequestMapping("/user/login")
+	public String login() {
+		return "user/login";
+	}
 
 	@GetMapping("/user/register")
 	public String register(){
@@ -40,5 +46,10 @@ public class UserController {
 		model.addAttribute("result", result);
 
 		return "user/email_auth";
+	}
+
+	@GetMapping("/user/info")
+	public String userInfo() {
+		return "user/info";
 	}
 }
