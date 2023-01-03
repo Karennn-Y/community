@@ -1,6 +1,7 @@
 package com.project.community.configuration;
 
 
+import com.project.community.configuration.handler.RedirectHandler;
 import com.project.community.configuration.handler.UserAuthenticationFailureHandler;
 import com.project.community.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return new UserAuthenticationFailureHandler();
 	}
 
+	@Bean
+	RedirectHandler getRedirectHandler() {
+		return new RedirectHandler();
+	}
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
@@ -47,15 +53,23 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 			)
 			.permitAll();
 
+		http.authorizeRequests()
+				.antMatchers("/admin/**")
+				.hasAuthority("ROLE_ADMIN");
+
 		http.formLogin()
 			.loginPage("/user/login")
 			.failureHandler(getFailureHandler())
+			.successHandler(getRedirectHandler())
 			.permitAll();
 
 		http.logout()
 			.logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
 				.logoutSuccessUrl("/")
 					.invalidateHttpSession(true);
+
+		http.exceptionHandling()
+			.accessDeniedPage("/error/denied");
 
 		super.configure(http);
 	}
