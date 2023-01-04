@@ -69,12 +69,15 @@ public class UserServiceImpl implements UserService {
 	public boolean emailAuth(String uuid) {
 
 		Optional<User> optionalUser = userRepository.findByEmailAuthKey(uuid);
-
 		if (!optionalUser.isPresent()) {
 			return false;
 		}
 
 		User user = optionalUser.get();
+
+		if (user.isEmailAuthYn()) {
+			return false;
+		}
 
 		user.setEmailAuthYn(true);
 		user.setEmailAuthDt(LocalDateTime.now());
@@ -174,6 +177,10 @@ public class UserServiceImpl implements UserService {
 
 		List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+
+		if (user.isAdminYn()) {
+			grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+		}
 
 		return new org.springframework.security.core.userdetails.User(
 				user.getUserId(), user.getPassword(), grantedAuthorities
