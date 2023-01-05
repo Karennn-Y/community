@@ -2,7 +2,7 @@ package com.project.community.admin.controller;
 
 import com.project.community.admin.dto.UserDto;
 import com.project.community.admin.model.UserParam;
-import com.project.community.user.entity.User;
+import com.project.community.admin.model.UserInput;
 import com.project.community.user.service.UserService;
 import com.project.community.util.PageUtil;
 import java.util.List;
@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @RequiredArgsConstructor
 @Controller
@@ -35,5 +36,32 @@ public class AdminUserController {
 		model.addAttribute("pager", pageUtil.pager());
 		model.addAttribute("totalCount", totalCount);
 		return "admin/user/list";
+	}
+
+	@GetMapping("/admin/user/detail.do")
+	public String detail(Model model, UserParam parameter) {
+
+		parameter.init();
+
+		UserDto user = userService.detail(parameter.getUserId());
+		model.addAttribute("user", user);
+
+		return "admin/user/detail";
+	}
+
+	@PostMapping("/admin/user/status.do")
+	public String status(Model model, UserInput parameter) {
+
+		boolean result = userService.updateStatus(parameter.getUserId(), parameter.getUserStatus());
+
+		return "redirect:/admin/user/detail.do?userId=" + parameter.getUserId();
+	}
+
+	@PostMapping("/admin/user/password.do")
+	public String password(Model model, UserInput parameter) {
+
+		boolean result = userService.updatePassword(parameter.getUserId(), parameter.getPassword());
+
+		return "redirect:/admin/user/detail.do?userId=" + parameter.getUserId();
 	}
 }

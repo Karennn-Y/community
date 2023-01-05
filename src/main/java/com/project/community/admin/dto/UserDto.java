@@ -1,9 +1,16 @@
 package com.project.community.admin.dto;
 
 
+import com.project.community.user.entity.User;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Data
 public class UserDto {
 
@@ -37,4 +44,25 @@ public class UserDto {
 	// indexing 위한 추가컬럼
 	long totalCount;
 	long seq; // sequence 처리
+
+	public static UserDto of (User user) {
+
+		return UserDto.builder()
+			.userId(user.getUserId())
+			.userName(user.getUserName())
+			.phoneNumber(user.getPhoneNumber())
+			.regDt(user.getRegDt())
+			.udtDt(user.getUdtDt())
+			.emailAuthYn(user.isEmailAuthYn())
+			.emailAuthDt(user.getEmailAuthDt())
+			.resetPasswordKey(user.getResetPasswordKey())
+			.resetPasswordLimitDt(user.getResetPasswordLimitDt())
+			.adminYn(user.isAdminYn())
+			.userStatus(user.getUserStatus())
+			.zipcode(user.getZipcode())
+			.addr(user.getAddr())
+			.addrDetail(user.getAddrDetail())
+			.build();
+
+	}
 }
