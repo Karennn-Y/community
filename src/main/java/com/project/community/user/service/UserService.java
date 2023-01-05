@@ -1,7 +1,11 @@
 package com.project.community.user.service;
 
+import com.project.community.admin.dto.UserDto;
+import com.project.community.admin.model.UserParam;
+import com.project.community.user.entity.User;
 import com.project.community.user.model.ResetPasswordInput;
 import com.project.community.user.model.UserInput;
+import java.util.List;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
@@ -20,4 +24,7 @@ public interface UserService extends UserDetailsService {
 
 	// uuid 값이 유효한지 확인
 	boolean checkResetPassword(String uuid);
+
+	// 회원 목록 리턴(관리자 용)
+	List<UserDto> list(UserParam parameter);
 }

@@ -1,5 +1,8 @@
 package com.project.community.user.service.impl;
 
+import com.project.community.admin.dto.UserDto;
+import com.project.community.admin.mapper.UserMapper;
+import com.project.community.admin.model.UserParam;
 import com.project.community.component.MailComponents;
 import com.project.community.user.entity.User;
 import com.project.community.user.exception.UserEmailNotAuthException;
@@ -19,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @RequiredArgsConstructor
 @Service
@@ -26,6 +30,7 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final MailComponents mailComponents;
+	private final UserMapper userMapper;
 
 	@Override
 	public boolean register(UserInput parameter) {
@@ -158,6 +163,22 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return true;
+	}
+
+	@Override
+	public List<UserDto> list(UserParam parameter) {
+		long totalCount = userMapper.selectListCount(parameter);
+		List<UserDto> list = userMapper.selectList(parameter);
+		if (!CollectionUtils.isEmpty(list)) {
+			int i = 0;
+			for (UserDto x : list) {
+				x.setTotalCount(totalCount);
+				x.setSeq(totalCount - parameter.getPageStart() - i);
+				i++;
+			}
+		}
+
+		return list;
 	}
 
 	@Override
