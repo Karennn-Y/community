@@ -3,6 +3,7 @@ package com.project.community.admin.dto;
 
 import com.project.community.user.entity.User;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,6 +45,7 @@ public class UserDto {
 	// indexing 위한 추가컬럼
 	long totalCount;
 	long seq; // sequence 처리
+	LocalDateTime loginDt;
 
 	public static UserDto of (User user) {
 
@@ -64,5 +66,15 @@ public class UserDto {
 			.addrDetail(user.getAddrDetail())
 			.build();
 
+	}
+
+	public String getRegDtText() {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+		return regDt != null ? regDt.format(formatter) : "";
+	}
+
+	public String getLoginDtText() {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+		return loginDt != null ? loginDt.format(formatter) : "";
 	}
 }

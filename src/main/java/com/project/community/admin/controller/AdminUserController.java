@@ -1,8 +1,11 @@
 package com.project.community.admin.controller;
 
+import com.project.community.admin.dto.LoginHistoryDto;
 import com.project.community.admin.dto.UserDto;
+import com.project.community.admin.model.LoginHistoryParam;
 import com.project.community.admin.model.UserParam;
 import com.project.community.admin.model.UserInput;
+import com.project.community.admin.service.LoginHistoryService;
 import com.project.community.user.service.UserService;
 import com.project.community.util.PageUtil;
 import java.util.List;
@@ -17,6 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class AdminUserController {
 
 	private final UserService userService;
+	private final LoginHistoryService loginHistoryService;
+
 	@GetMapping("/admin/user/list.do")
 	public String list(Model model, UserParam parameter) {
 
@@ -39,12 +44,17 @@ public class AdminUserController {
 	}
 
 	@GetMapping("/admin/user/detail.do")
-	public String detail(Model model, UserParam parameter) {
+	public String detail(Model model
+		, UserParam userParameter
+		, LoginHistoryParam historyParameter) {
 
-		parameter.init();
+		userParameter.init();
+		historyParameter.init();
 
-		UserDto user = userService.detail(parameter.getUserId());
+		UserDto user = userService.detail(userParameter.getUserId());
+		List<LoginHistoryDto> logins = loginHistoryService.list(historyParameter);
 		model.addAttribute("user", user);
+		model.addAttribute("login", logins);
 
 		return "admin/user/detail";
 	}

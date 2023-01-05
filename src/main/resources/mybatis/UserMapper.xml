@@ -44,9 +44,10 @@
   <select id="selectList"
     resultType="com.project.community.admin.dto.UserDto">
 
-    select *
-    from user
-    where 1=1
+    select u.*
+    , (select login_dt from login_history where user_id = u.user_id order by login_dt desc limit 1) as login_dt
+    from user u
+    where 1 = 1
       <include refid="selectListWhere"/>
 
     limit #{pageStart}, #{pageEnd}

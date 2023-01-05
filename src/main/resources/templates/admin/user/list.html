@@ -86,13 +86,13 @@
             <p th:if="${x.emailAuthYn}">Y</p>
             <p th:if="${x.emailAuthYn eq false}">N</p>
           </td>
-          <td th:text="${x.regDt}">2022.12.01</td>
+          <td th:text="${x.regDtText}">2022.12.01</td>
           <td>
             <p th:if="${x.adminYn}">Y</p>
             <p th:if="${x.adminYn eq false}">N</p>
           </td>
           <td>
-            <p>1111</p>
+            <p th:text="${x.loginDtText}"></p>
           </td>
         </tr>
       </tbody>
