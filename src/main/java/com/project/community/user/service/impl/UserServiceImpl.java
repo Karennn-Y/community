@@ -6,12 +6,14 @@ import com.project.community.admin.model.UserParam;
 import com.project.community.component.MailComponents;
 import com.project.community.main.service.ServiceResult;
 import com.project.community.user.entity.User;
+import com.project.community.user.entity.UserCode;
 import com.project.community.user.exception.StopUserException;
 import com.project.community.user.exception.UserEmailNotAuthException;
 import com.project.community.user.model.ResetPasswordInput;
 import com.project.community.user.model.UserInput;
 import com.project.community.user.repository.UserRepository;
 import com.project.community.user.service.UserService;
+import com.project.community.util.PasswordUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +46,7 @@ public class UserServiceImpl implements UserService {
 			return new ServiceResult(false,"이미 가입된 아이디 입니다.");
 		}
 
-		String encPassword = BCrypt.hashpw(parameter.getPassword(), BCrypt.gensalt());
+		String encPassword = PasswordUtils.encPassword(parameter.getPassword());
 
 
 		String uuid = UUID.randomUUID().toString();
@@ -143,7 +145,7 @@ public class UserServiceImpl implements UserService {
 			return new ServiceResult(false,"유효한 날짜가 아닙니다.");
 		}
 
-		String encPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+		String encPassword = PasswordUtils.encPassword(password);
 		user.setPassword(encPassword);
 		user.setResetPasswordKey("");
 		user.setResetPasswordLimitDt(null);
@@ -266,12 +268,46 @@ public class UserServiceImpl implements UserService {
 		}
 
 		User user = optionalUser.get();
-		if (!BCrypt.checkpw(parameter.getPassword(), user.getPassword())) {
+		if (!PasswordUtils.equals(parameter.getPassword(), user.getPassword())) {
 			return new ServiceResult(false, "비밀번호가 일치하지 않습니다.");
 		}
 
-		String encPassword = BCrypt.hashpw(parameter.getNewPassword(), BCrypt.gensalt());
+		String encPassword = PasswordUtils.encPassword(parameter.getNewPassword());
 		user.setPassword(encPassword);
+		userRepository.save(user);
+
+		return new ServiceResult();
+	}
+
+	@Override
+	public ServiceResult withdraw(String userId, String password) {
+
+		Optional<User> optionalUser = userRepository.findById(userId);
+		if (!optionalUser.isPresent()) {
+			throw new UsernameNotFoundException("회원 정보가 존재하지 않습니다.");
+		}
+
+		User user = optionalUser.get();
+
+		if (!PasswordUtils.equals(password, user.getPassword())) {
+			return new ServiceResult(false, "비밀번호가 일치하지 않습니다.");
+		}
+
+		user.setUserName("탈퇴회원");
+		user.setPhoneNumber("");
+		user.setPassword("");
+		user.setRegDt(null);
+		user.setUdtDt(null);
+		user.setEmailAuthYn(false);
+		user.setEmailAuthDt(null);
+		user.setEmailAuthKey("");
+		user.setResetPasswordKey("");
+		user.setResetPasswordLimitDt(null);
+		user.setUserStatus(UserCode.USER_STATUS_WITHDRAW);
+		user.setZipcode("");
+		user.setAddr("");
+		user.setAddrDetail("");
+
 		userRepository.save(user);
 
 		return new ServiceResult();
@@ -294,6 +330,10 @@ public class UserServiceImpl implements UserService {
 
 		if (User.USER_STATUS_STOP.equals(user.getUserStatus())) {
 			throw new StopUserException("정지된 회원입니다.");
+		}
+
+		if (User.USER_STATUS_WITHDRAW.equals(user.getUserStatus())) {
+			throw new StopUserException("탈퇴 회원입니다.");
 		}
 
 		List<GrantedAuthority> grantedAuthorities = new ArrayList<>();

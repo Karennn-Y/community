@@ -6,9 +6,9 @@ import com.project.community.user.model.ResetPasswordInput;
 import com.project.community.user.model.UserInput;
 import com.project.community.user.repository.UserRepository;
 import com.project.community.user.service.UserService;
+import com.project.community.util.PasswordUtils;
 import java.security.Principal;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -133,14 +133,37 @@ public class UserController {
 		return "redirect:/user/info";
 	}
 
-	@GetMapping("/user/my_posts")
+	@GetMapping("/user/withdraw")
+	public String userWithdraw(Model model) {
+
+		return "user/withdraw";
+	}
+
+	@PostMapping("/user/withdraw")
+	public String userWithdrawSubmit(Model model
+		, UserInput parameter
+		, Principal principal) {
+
+		String userId = principal.getName();
+
+		ServiceResult result = userService.withdraw(userId, parameter.getPassword());
+
+		if (!result.isResult()) {
+			model.addAttribute("message", result.getMessage());
+			return "common/error";
+		}
+		return "redirect:/user/logout";
+	}
+
+
+	@GetMapping("/user/posts")
 	public String userPosts(Model model, Principal principal) {
 
 		String userId = principal.getName();
 		UserDto detail = userService.detail(userId);
 
 		model.addAttribute("detail", detail);
-		return "user/my_posts";
+		return "user/posts";
 	}
 
 

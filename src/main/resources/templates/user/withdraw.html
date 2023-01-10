@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>회원 정보</title>
+</head>
+<body>
+
+
+    <h1>회원 탈퇴</h1>
+    <div th:replace="/fragments/layout.html :: fragment-body-menu"></div>
+
+    <div>
+      <a href="/user/info">회원 정보 수정</a>
+      |
+      <a href="/user/password">비밀번호 변경</a>
+      |
+      <a href="/user/posts">작성글 목록</a>
+      <hr/>
+    </div>
+
+    <div>
+      <p>
+        회원 탈퇴시
+        <br/>
+        제공되는 서비스를 더이상 이용하실 수 없습니다.
+        <br/>
+        <br/>
+        회원 탈퇴를 진행 하시겠습니까?
+      </p>
+      <form id="submitForm" method="post">
+        <div>
+          <input type="password" name="password" placeholder="현재 비밀번호 입력" required/>
+        </div>
+          <div>
+            <button type="submit">탈퇴하기</button>
+          </div>
+      </form>
+    </div>
+
+
+</body>
+</html>
