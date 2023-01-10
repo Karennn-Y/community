@@ -73,6 +73,11 @@ public class UserDto {
 		return regDt != null ? regDt.format(formatter) : "";
 	}
 
+	public String getUdtDtText() {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+		return udtDt != null ? udtDt.format(formatter) : "";
+	}
+
 	public String getLoginDtText() {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
 		return loginDt != null ? loginDt.format(formatter) : "";

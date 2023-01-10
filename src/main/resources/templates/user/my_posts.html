@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>회원 정보</title>
+</head>
+<body>
+
+
+    <h1>회원 정보</h1>
+    <div th:replace="/fragments/layout.html :: fragment-body-menu"></div>
+
+    <div>
+      <hr/>
+      <a href="/user/info">회원 정보 수정</a>
+      |
+      <a href="/user/password">비밀번호 변경</a>
+      |
+      <a href="/user/my_posts">작성글 목록</a>
+      <hr/>
+    </div>
+    <div th:text="${detail}"></div>
+
+
+</body>
+</html>

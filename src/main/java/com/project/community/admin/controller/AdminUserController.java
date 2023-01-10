@@ -6,6 +6,7 @@ import com.project.community.admin.model.LoginHistoryParam;
 import com.project.community.admin.model.UserParam;
 import com.project.community.admin.model.UserInput;
 import com.project.community.admin.service.LoginHistoryService;
+import com.project.community.main.service.ServiceResult;
 import com.project.community.user.service.UserService;
 import com.project.community.util.PageUtil;
 import java.util.List;
@@ -62,7 +63,11 @@ public class AdminUserController {
 	@PostMapping("/admin/user/status.do")
 	public String status(Model model, UserInput parameter) {
 
-		boolean result = userService.updateStatus(parameter.getUserId(), parameter.getUserStatus());
+		ServiceResult result = userService.updateStatus(parameter.getUserId(), parameter.getUserStatus());
+		if (!result.isResult()) {
+			model.addAttribute("message", result.getMessage());
+			return "common/error";
+		}
 
 		return "redirect:/admin/user/detail.do?userId=" + parameter.getUserId();
 	}
@@ -70,7 +75,11 @@ public class AdminUserController {
 	@PostMapping("/admin/user/password.do")
 	public String password(Model model, UserInput parameter) {
 
-		boolean result = userService.updatePassword(parameter.getUserId(), parameter.getPassword());
+		ServiceResult result = userService.updatePassword(parameter.getUserId(), parameter.getPassword());
+		if (!result.isResult()) {
+			model.addAttribute("message", result.getMessage());
+			return "common/error";
+		}
 
 		return "redirect:/admin/user/detail.do?userId=" + parameter.getUserId();
 	}

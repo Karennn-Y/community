@@ -1,9 +1,12 @@
 package com.project.community.user.controller;
 
+import com.project.community.admin.dto.UserDto;
+import com.project.community.main.service.ServiceResult;
 import com.project.community.user.model.ResetPasswordInput;
 import com.project.community.user.model.UserInput;
 import com.project.community.user.repository.UserRepository;
 import com.project.community.user.service.UserService;
+import java.security.Principal;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -33,13 +36,13 @@ public class UserController {
 	@PostMapping("/user/find/password")
 	public String findPasswordSubmit(Model model, ResetPasswordInput parameter) {
 
-		boolean result = false;
-		try {
-			result = userService.sendResetPassword(parameter);
-		} catch (Exception e) {
+		ServiceResult result = userService.sendResetPassword(parameter);
+		if (!result.isResult()) {
+			model.addAttribute("message", result.getMessage());
+			return "common/error";
 		}
-		model.addAttribute("result", result);
 
+		model.addAttribute("result", result);
 		return "user/find_password_result";
 	}
 
@@ -51,7 +54,11 @@ public class UserController {
 	@PostMapping("/user/register")
 	public String registerSubmit(Model model, UserInput parameter) {
 
-		boolean result = userService.register(parameter);
+		ServiceResult result = userService.register(parameter);
+		if (!result.isResult()) {
+			model.addAttribute("message", result.getMessage());
+			return "common/error";
+		}
 		model.addAttribute("result", result);
 		return "user/register_complete";
 	}
@@ -61,41 +68,107 @@ public class UserController {
 
 		String uuid = request.getParameter("id");
 
-		boolean result = userService.emailAuth(uuid);
-		model.addAttribute("result", result);
+		ServiceResult result = userService.emailAuth(uuid);
+		if (!result.isResult()) {
+			model.addAttribute("message", result.getMessage());
+			return "common/error";
+		}
 
+		model.addAttribute("result", result);
 		return "user/email_auth";
 	}
 
 	@GetMapping("/user/info")
-	public String userInfo() {
+	public String userInfo(Model model, Principal principal) {
+
+		String userId = principal.getName();
+		UserDto detail = userService.detail(userId);
+
+		model.addAttribute("detail", detail);
 		return "user/info";
 	}
+
+	@PostMapping("/user/info")
+	public String userInfoSubmit(Model model
+		, UserInput parameter
+		, Principal principal) {
+
+		String userId = principal.getName();
+		parameter.setUserId(userId);
+
+		ServiceResult result = userService.updateUser(parameter);
+
+		if (!result.isResult()) {
+			model.addAttribute("message", result.getMessage());
+			return "common/error";
+		}
+
+		return "redirect:/user/info";
+	}
+
+	@GetMapping("/user/password")
+	public String userPassword(Model model, Principal principal) {
+
+		String userId = principal.getName();
+		UserDto detail = userService.detail(userId);
+
+		model.addAttribute("detail", detail);
+		return "user/password";
+	}
+
+	@PostMapping("/user/password")
+	public String userPasswordSubmit(Model model
+									, UserInput parameter
+									, Principal principal) {
+
+		String userId = principal.getName();
+		parameter.setUserId(userId);
+		ServiceResult result = userService.updateUserPassword(parameter);
+
+		if (!result.isResult()) {
+			model.addAttribute("message", result.getMessage());
+			return "common/error";
+		}
+
+		return "redirect:/user/info";
+	}
+
+	@GetMapping("/user/my_posts")
+	public String userPosts(Model model, Principal principal) {
+
+		String userId = principal.getName();
+		UserDto detail = userService.detail(userId);
+
+		model.addAttribute("detail", detail);
+		return "user/my_posts";
+	}
+
 
 	@GetMapping("/user/reset/password")
 	public String resetPassword(Model model, HttpServletRequest request) {
 
 		String uuid = request.getParameter("id");
 
-		boolean result = userService.checkResetPassword(uuid);
+		ServiceResult result = userService.checkResetPassword(uuid);
+		if (!result.isResult()) {
+			model.addAttribute("message", result.getMessage());
+			return "common/error";
+		}
 
 		model.addAttribute("result", result);
-
 		return "user/reset_password";
 	}
 
 	@PostMapping("/user/reset/password")
 	public String resetPasswordSubmit(Model model, ResetPasswordInput parameter) {
 
-		boolean result = false;
-		try {
-			result = userService.resetPassword(parameter.getId(), parameter.getPassword());
-		} catch (Exception e) {
+		ServiceResult result = userService.resetPassword(parameter.getId(), parameter.getPassword());
+		if (!result.isResult()) {
+			model.addAttribute("message", result.getMessage());
+			return "common/error";
 		}
 
 		model.addAttribute("result", result);
-
-
 		return "user/reset_password_result";
 	}
 }
