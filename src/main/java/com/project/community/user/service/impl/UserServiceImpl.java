@@ -1,7 +1,11 @@
 package com.project.community.user.service.impl;
 
+import com.project.community.admin.dto.UserDto;
+import com.project.community.admin.mapper.UserMapper;
+import com.project.community.admin.model.UserParam;
 import com.project.community.component.MailComponents;
 import com.project.community.user.entity.User;
+import com.project.community.user.exception.StopUserException;
 import com.project.community.user.exception.UserEmailNotAuthException;
 import com.project.community.user.model.ResetPasswordInput;
 import com.project.community.user.model.UserInput;
@@ -19,6 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @RequiredArgsConstructor
 @Service
@@ -26,6 +31,7 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final MailComponents mailComponents;
+	private final UserMapper userMapper;
 
 	@Override
 	public boolean register(UserInput parameter) {
@@ -50,6 +56,7 @@ public class UserServiceImpl implements UserService {
 				.regDt(LocalDateTime.now())
 				.emailAuthYn(false)
 				.emailAuthKey(uuid)
+				.userStatus(User.USER_STATUS_REQ)
 				.build();
 
 		userRepository.save(user);
@@ -80,6 +87,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		user.setEmailAuthYn(true);
+		user.setUserStatus(User.USER_STATUS_ING);
 		user.setEmailAuthDt(LocalDateTime.now());
 
 		userRepository.save(user);
@@ -161,6 +169,69 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<UserDto> list(UserParam parameter) {
+		long totalCount = userMapper.selectListCount(parameter);
+		List<UserDto> list = userMapper.selectList(parameter);
+		if (!CollectionUtils.isEmpty(list)) {
+			int i = 0;
+			for (UserDto x : list) {
+				x.setTotalCount(totalCount);
+				x.setSeq(totalCount - parameter.getPageStart() - i);
+				i++;
+			}
+		}
+
+		return list;
+	}
+
+	@Override
+	public UserDto detail(String userId) {
+
+		Optional<User> optionalUser = userRepository.findById(userId);
+		if (!optionalUser.isPresent()) {
+			return null;
+		}
+		User user = optionalUser.get();
+
+		return UserDto.of(user);
+	}
+
+	@Override
+	public boolean updateStatus(String userId, String userStatus) {
+
+		Optional<User> optionalUser = userRepository.findById(userId);
+
+		if (!optionalUser.isPresent()) {
+			throw new UsernameNotFoundException("회원 정보가 존재하지 않습니다.");
+		}
+
+		User user = optionalUser.get();
+		user.setUserStatus(userStatus);
+		userRepository.save(user);
+
+		return true;
+	}
+
+	@Override
+	public boolean updatePassword(String userId, String password) {
+
+		Optional<User> optionalUser = userRepository.findById(userId);
+
+		if (!optionalUser.isPresent()) {
+			throw new UsernameNotFoundException("회원 정보가 존재하지 않습니다.");
+		}
+
+		User user = optionalUser.get();
+
+		String encPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
+		user.setPassword(encPassword);
+		userRepository.save(user);
+
+		return true;
+	}
+
+	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
 		Optional<User> optionalUser = userRepository.findById(username);
@@ -171,8 +242,12 @@ public class UserServiceImpl implements UserService {
 
 		User user = optionalUser.get();
 
-		if (!user.isEmailAuthYn()) {
+		if (User.USER_STATUS_REQ.equals(user.getUserStatus())) {
 			throw new UserEmailNotAuthException("이메일 인증 이후에 로그인 해주세요.");
+		}
+
+		if (User.USER_STATUS_STOP.equals(user.getUserStatus())) {
+			throw new StopUserException("정지된 회원입니다.");
 		}
 
 		List<GrantedAuthority> grantedAuthorities = new ArrayList<>();

@@ -1,8 +1,9 @@
 package com.project.community.configuration;
 
 
-import com.project.community.configuration.handler.RedirectHandler;
+import com.project.community.admin.service.LoginHistoryService;
 import com.project.community.configuration.handler.UserAuthenticationFailureHandler;
+import com.project.community.configuration.handler.UserAuthenticationSuccessHandler;
 import com.project.community.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	private final UserService userService;
+	private final LoginHistoryService loginHistoryService;
 
 	@Bean
 	PasswordEncoder getPasswordEncoder() {
@@ -32,11 +34,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	UserAuthenticationFailureHandler getFailureHandler() {
 		return new UserAuthenticationFailureHandler();
 	}
-
 	@Bean
-	RedirectHandler getRedirectHandler() {
-		return new RedirectHandler();
+	UserAuthenticationSuccessHandler getSuccessHandler() {
+		return new UserAuthenticationSuccessHandler(loginHistoryService);
 	}
+
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -60,7 +62,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.formLogin()
 			.loginPage("/user/login")
 			.failureHandler(getFailureHandler())
-			.successHandler(getRedirectHandler())
+			.successHandler(getSuccessHandler())
 			.permitAll();
 
 		http.logout()
