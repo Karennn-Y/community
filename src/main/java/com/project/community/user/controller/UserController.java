@@ -150,6 +150,7 @@ public class UserController {
 
 		if (!result.isResult()) {
 			model.addAttribute("message", result.getMessage());
+			model.addAttribute("url", "");
 			return "common/error";
 		}
 		return "redirect:/user/logout";
