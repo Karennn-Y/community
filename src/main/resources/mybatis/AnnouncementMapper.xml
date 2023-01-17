@@ -8,23 +8,18 @@
 
     <if test="searchType != null and searchValue != null">
       <choose>
-        <when test="searchType == 'userId'">
-          and user_id like concat('%', #{searchValue}, '%')
+        <when test="searchType == 'subject'">
+          and subject like concat('%', #{searchValue}, '%')
         </when>
-        <when test="searchType == 'userName'">
-          and user_name like concat('%', #{searchValue}, '%')
-        </when>
-        <when test="searchType == 'phoneNumber'">
-          and phone_number like concat('%', #{searchValue}, '%')
+        <when test="searchType == 'contents'">
+          and contents like concat('%', #{searchValue}, '%')
         </when>
         <otherwise>
           and
           (
-          user_id like concat('%', #{searchValue}, '%')
+          subject like concat('%', #{searchValue}, '%')
           or
-          user_name like concat('%', #{searchValue}, '%')
-          or
-          phone_number like concat('%', #{searchValue}, '%')
+          contents like concat('%', #{searchValue}, '%')
           )
         </otherwise>
       </choose>
@@ -52,6 +47,30 @@
     order by reg_dt desc
 
     limit #{pageStart}, #{pageEnd}
+
+  </select>
+
+  <select id="frontSelectList"
+    resultType="com.project.community.announcement.dto.AnnouncementDto">
+
+    select *
+    from announcement
+    where 1 = 1
+      <include refid="selectListWhere"/>
+    and post_dt between date_add(now(), interval -5 year) and now()
+    order by post_dt desc
+
+    limit #{pageStart}, #{pageEnd}
+
+  </select>
+
+  <select id="frontSelectListCount" resultType="long">
+
+    select count(*)
+    from announcement
+    where 1 = 1
+      <include refid="selectListWhere"/>
+    and post_dt between date_add(now(), interval -5 year) and now()
 
   </select>
 

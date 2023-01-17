@@ -1,9 +1,13 @@
 package com.project.community.announcement.dto;
 
+import com.project.community.admin.dto.LoginHistoryDto;
+import com.project.community.admin.entity.LoginHistory;
 import com.project.community.announcement.entity.Announcement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,6 +45,20 @@ public class AnnouncementDto {
 			.postDt(announcement.getPostDt())
 			.build();
 	}
+
+	public static List<AnnouncementDto> of (List<Announcement> announcements) {
+		if (announcements == null) {
+			return null;
+		}
+
+		List<AnnouncementDto> announcementList = new ArrayList<>();
+		for (Announcement x : announcements) {
+			announcementList.add(of(x));
+		}
+
+		return announcementList;
+	}
+
 	public String getRegDtText() {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
 		return regDt != null ? regDt.format(formatter) : "";

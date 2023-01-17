@@ -5,5 +5,6 @@ import lombok.Data;
 
 @Data
 public class AnnouncementParam extends CommonParam {
-
+	// announcement.id
+	long id;
 }

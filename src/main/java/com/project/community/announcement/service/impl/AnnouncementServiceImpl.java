@@ -10,7 +10,6 @@ import com.project.community.announcement.service.AnnouncementService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -113,6 +112,32 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public List<AnnouncementDto> frontList(AnnouncementParam parameter) {
+
+		long totalCount = announcementMapper.frontSelectListCount(parameter);
+		List<AnnouncementDto> announcementList = announcementMapper.frontSelectList(parameter);
+
+		if (!CollectionUtils.isEmpty(announcementList)) {
+			int i = 0;
+			for (AnnouncementDto x : announcementList) {
+				x.setTotalCount(totalCount);
+				x.setSeq(totalCount - parameter.getPageStart() - i);
+				i++;
+			}
+		}
+
+		return announcementList;
+	}
+
+	@Override
+	public AnnouncementDto frontDetail(long id) {
+
+		Optional<Announcement> optionalAnnouncement = announcementRepository.findById(id);
+
+		return optionalAnnouncement.map(AnnouncementDto::of).orElse(null);
 	}
 
 }

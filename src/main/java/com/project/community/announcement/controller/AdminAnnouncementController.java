@@ -31,7 +31,7 @@ public class AdminAnnouncementController extends BaseController {
 			totalCount = announcementList.get(0).getTotalCount();
 		}
 
-		String queryString = parameter.getQueryString();
+ 		String queryString = parameter.getQueryString();
 		String pagerHtml = getPagerHtml(totalCount, parameter.getPageSize(), parameter.getPageIndex(), queryString);
 
 		model.addAttribute("list", announcementList);

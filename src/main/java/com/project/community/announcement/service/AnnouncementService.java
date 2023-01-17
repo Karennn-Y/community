@@ -21,4 +21,9 @@ public interface AnnouncementService {
 
 	// 공지사항 삭제
 	boolean del(String idList);
+
+	// 사용자 공지사항 목록
+	List<AnnouncementDto> frontList(AnnouncementParam parameter);
+	// 사용자 공지사항 상세정보
+	AnnouncementDto frontDetail(long id);
 }
