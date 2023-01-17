@@ -64,7 +64,7 @@ public class UserController {
 	}
 
 	@GetMapping("/user/email-auth")
-	public String emailAuth(Model model, HttpServletRequest request) {
+	public String emailAUTH(Model model, HttpServletRequest request) {
 
 		String uuid = request.getParameter("id");
 
@@ -79,7 +79,7 @@ public class UserController {
 	}
 
 	@GetMapping("/user/info")
-	public String userInfo(Model model, Principal principal) {
+	public String userINFO(Model model, Principal principal) {
 
 		String userId = principal.getName();
 		UserDto detail = userService.detail(userId);
@@ -89,7 +89,7 @@ public class UserController {
 	}
 
 	@PostMapping("/user/info")
-	public String userInfoSubmit(Model model
+	public String userINFOSubmit(Model model
 		, UserInput parameter
 		, Principal principal) {
 

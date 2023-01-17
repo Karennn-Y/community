@@ -6,6 +6,7 @@ import com.project.community.admin.model.LoginHistoryParam;
 import com.project.community.admin.model.UserParam;
 import com.project.community.admin.model.UserInput;
 import com.project.community.admin.service.LoginHistoryService;
+import com.project.community.common.controller.BaseController;
 import com.project.community.main.service.ServiceResult;
 import com.project.community.user.service.UserService;
 import com.project.community.util.PageUtil;
@@ -13,12 +14,13 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @RequiredArgsConstructor
 @Controller
-public class AdminUserController {
+public class AdminUserController extends BaseController {
 
 	private final UserService userService;
 	private final LoginHistoryService loginHistoryService;
@@ -31,15 +33,15 @@ public class AdminUserController {
 		List<UserDto> users = userService.list(parameter);
 
 		long totalCount = 0;
-		if (users != null && users.size() > 0) {
+		if (!CollectionUtils.isEmpty(users)) {
 			totalCount = users.get(0).getTotalCount();
 		}
 		String queryString = parameter.getQueryString();
 
-		PageUtil pageUtil = new PageUtil(totalCount, parameter.getPageSize(), parameter.getPageIndex(), queryString);
+		String pagerHtml = getPagerHtml(totalCount, parameter.getPageSize(), parameter.getPageIndex(), queryString);
 
 		model.addAttribute("list", users);
-		model.addAttribute("pager", pageUtil.pager());
+		model.addAttribute("pager", pagerHtml);
 		model.addAttribute("totalCount", totalCount);
 		return "admin/user/list";
 	}

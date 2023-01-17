@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>공지사항 상세</title>
+  <style>
+    .title {
+      border-radius: 25px;
+      border: 2px solid grey;
+      padding: 20px;
+      width: 97%;
+      height: 50px;
+      text-align: center;
+    }
+
+    .list table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .list table th, .list table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .list table tbody tr:hover {
+      background-color: darkgray;
+    }
+    p.nothing {
+      text-align: center;
+      padding: 100px;
+    }
+    .pager {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .pager a.on {
+      font-weight: bold;
+      color: red;
+    }
+    .list .buttons {
+      position: relative;
+      padding: 10px 0 ;
+    }
+    .list .buttons a, .list .buttons button {
+      border-width: 0;
+      background-color: transparent;
+      text-decoration: underline;
+      font-size: 16px;
+      line-height: 20px;
+      color: black;
+      cursor: pointer;
+    }
+    .list .buttons .total-count {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.2.min.js" integrity="sha256-2krYZKh//PcchRtd+H+VyyQoZ/e3EcrkxhM8ycwASPA=" crossorigin="anonymous"></script>
+  <script>
+    $(document).ready(function () {
+    });
+
+  </script>
+
+</head>
+<body>
+<div th:replace="/fragments/layout.html :: fragment-body-menu">
+</div>
+<h1>공지사항</h1>
+
+
+<div class="title" style="text-align: center">
+  <h3 th:text="${detail.subject}">제목</h3>
+</div>
+<div style="text-align: right;">
+  <p>게시일: <span th:text="${detail.postDtText}"></span></p>
+  <p>작성자: <span th:text="${detail.registrant}"></span></p>
+</div>
+<hr/>
+<br/>
+<div th:utext="${detail.contents}"></div>
+
+<br/>
+<hr/>
+<div style="text-align: center">
+  <a href="/announcement/list">목록</a>
+</div>
+
+</body>
+</html>

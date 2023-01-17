@@ -1,4 +1,4 @@
-package com.project.community.admin.model;
+package com.project.community.common.model;
 
 import lombok.Data;
 
