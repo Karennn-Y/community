@@ -6,7 +6,7 @@
 </head>
 <body>
 
-    <div th:fragment="fragment-body-menu">
+    <div style="text-align: right" th:fragment="fragment-body-menu">
       <div>
         <a href="/user/register">회원 가입</a>
         |
@@ -19,13 +19,25 @@
       <hr/>
     </div>
 
+    <div th:fragment="fragment-board-menu">
+      <hr/>
+      <div>
+        <a href="/announcement/list">공지사항</a>
+        |
+        <a href="/board/list">게시판</a>
+      </div>
+      <hr/>
+    </div>
+
 
     <div th:fragment="fragment-admin-menu">
-      <a href="/admin/main">관리자 메인</a>
+      <a href="/admin/main.do">관리자 메인</a>
       |
       <a href="/admin/user/list.do">회원 관리</a>
       |
       <a href="/admin/board/list.do">게시글 관리</a>
+      |
+      <a href="/admin/category/list.do">카테고리 관리</a>
       |
       <a href="/admin/announcement/list.do">공지사항 관리</a>
       |

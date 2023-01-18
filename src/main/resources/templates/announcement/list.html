@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>공지사항</title>
+  <style>
+    .list table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .list table th, .list table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .list table tbody tr:hover {
+      background-color: darkgray;
+    }
+    p.nothing {
+      text-align: center;
+      padding: 100px;
+    }
+    .pager {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .pager a.on {
+      font-weight: bold;
+      color: red;
+    }
+    .list .buttons {
+      position: relative;
+      padding: 10px 0 ;
+    }
+    .list .buttons a, .list .buttons button {
+      border-width: 0;
+      background-color: transparent;
+      text-decoration: underline;
+      font-size: 16px;
+      line-height: 20px;
+      color: black;
+      cursor: pointer;
+    }
+    .list .buttons .total-count {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+    .search-form {
+      position: relative;
+      padding: 5px 0 10px 0;
+      text-align: right;
+    }
+    .search-form .total-count {
+      position: absolute;
+      left: 0; top: 0;
+      height: 20px;
+      float: left;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.2.min.js" integrity="sha256-2krYZKh//PcchRtd+H+VyyQoZ/e3EcrkxhM8ycwASPA=" crossorigin="anonymous"></script>
+  <script>
+    $(document).ready(function () {
+    });
+
+  </script>
+
+</head>
+<body>
+<div th:replace="/fragments/layout.html :: fragment-body-menu">
+</div>
+<h1>공지사항 목록</h1>
+<div th:replace="/fragments/layout.html :: fragment-board-menu">
+</div>
+
+<div class="list">
+
+  <div class="search-form">
+    <p class="total-count">전체 <span th:text="${totalCount}"></span> 개</p>
+    <form method="get">
+      <select name="searchType">
+        <option value="all">전체</option>
+        <option th:selected="${#strings.equals(param.searchType, 'subject')}" value="subject">제목</option>
+        <option th:selected="${#strings.equals(param.searchType, 'contents')}" value="contents">내용</option>
+      </select>
+
+
+      <input th:value="${param.searchValue}" type="search" name="searchValue"/>
+      <button type="submit">검색</button>
+    </form>
+  </div>
+
+  <table>
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>제목</th>
+      <th>게시일</th>
+    </tr>
+    </thead>
+    <tbody id="dataList">
+    <tr th:each="x : ${list}">
+      <td th:text="${x.seq}"> 1 </td>
+      <td>
+        <p>
+          <a th:href="'/announcement/' + ${x.id}"
+             th:text="${x.subject}">제목</a>
+        </p>
+      </td>
+      <td th:text="${x.postDtText}"></td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(list)}">
+      <td colspan="4">
+        <p class="nothing">내용이 없습니다.</p>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <div class="pager" th:utext="${pager}">
+  </div>
+</div>
+
+</body>
+</html>

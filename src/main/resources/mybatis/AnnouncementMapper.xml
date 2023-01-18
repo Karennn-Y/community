@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.community.announcement.mapper.AnnouncementMapper">
+
+  <sql id="selectListWhere">
+
+    <if test="searchType != null and searchValue != null">
+      <choose>
+        <when test="searchType == 'subject'">
+          and subject like concat('%', #{searchValue}, '%')
+        </when>
+        <when test="searchType == 'contents'">
+          and contents like concat('%', #{searchValue}, '%')
+        </when>
+        <otherwise>
+          and
+          (
+          subject like concat('%', #{searchValue}, '%')
+          or
+          contents like concat('%', #{searchValue}, '%')
+          )
+        </otherwise>
+      </choose>
+    </if>
+
+  </sql>
+
+
+  <select id="selectListCount" resultType="long">
+
+    select count(*)
+    from announcement
+    where 1 = 1
+      <include refid="selectListWhere"/>
+
+  </select>
+
+  <select id="selectList"
+    resultType="com.project.community.announcement.dto.AnnouncementDto">
+
+    select *
+    from announcement
+    where 1 = 1
+      <include refid="selectListWhere"/>
+    order by reg_dt desc
+
+    limit #{pageStart}, #{pageEnd}
+
+  </select>
+
+  <select id="frontSelectList"
+    resultType="com.project.community.announcement.dto.AnnouncementDto">
+
+    select *
+    from announcement
+    where 1 = 1
+      <include refid="selectListWhere"/>
+    and post_dt between date_add(now(), interval -5 year) and now()
+    order by post_dt desc
+
+    limit #{pageStart}, #{pageEnd}
+
+  </select>
+
+  <select id="frontSelectListCount" resultType="long">
+
+    select count(*)
+    from announcement
+    where 1 = 1
+      <include refid="selectListWhere"/>
+    and post_dt between date_add(now(), interval -5 year) and now()
+
+  </select>
+
+</mapper>

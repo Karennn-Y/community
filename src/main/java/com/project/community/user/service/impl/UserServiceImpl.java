@@ -4,13 +4,16 @@ import com.project.community.admin.dto.UserDto;
 import com.project.community.admin.mapper.UserMapper;
 import com.project.community.admin.model.UserParam;
 import com.project.community.component.MailComponents;
+import com.project.community.main.service.ServiceResult;
 import com.project.community.user.entity.User;
+import com.project.community.user.entity.UserCode;
 import com.project.community.user.exception.StopUserException;
 import com.project.community.user.exception.UserEmailNotAuthException;
 import com.project.community.user.model.ResetPasswordInput;
 import com.project.community.user.model.UserInput;
 import com.project.community.user.repository.UserRepository;
 import com.project.community.user.service.UserService;
+import com.project.community.util.PasswordUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,16 +37,16 @@ public class UserServiceImpl implements UserService {
 	private final UserMapper userMapper;
 
 	@Override
-	public boolean register(UserInput parameter) {
+	public ServiceResult register(UserInput parameter) {
 
 		Optional<User> optionalUser = userRepository.findById(parameter.getUserId());
 
 		// id 회원가입 여부 조회(동일 id 있을 경우 return false)
 		if (optionalUser.isPresent()) {
-			return false;
+			return new ServiceResult(false,"이미 가입된 아이디 입니다.");
 		}
 
-		String encPassword = BCrypt.hashpw(parameter.getPassword(), BCrypt.gensalt());
+		String encPassword = PasswordUtils.encPassword(parameter.getPassword());
 
 
 		String uuid = UUID.randomUUID().toString();
@@ -53,6 +56,9 @@ public class UserServiceImpl implements UserService {
 				.userName(parameter.getUserName())
 				.phoneNumber(parameter.getPhoneNumber())
 				.password(encPassword)
+				.zipcode(parameter.getZipcode())
+				.addr(parameter.getAddr())
+				.addrDetail(parameter.getAddrDetail())
 				.regDt(LocalDateTime.now())
 				.emailAuthYn(false)
 				.emailAuthKey(uuid)
@@ -69,21 +75,21 @@ public class UserServiceImpl implements UserService {
 
 		mailComponents.sendMail(email, subject, text);
 
-		return true;
+		return new ServiceResult();
 	}
 
 	@Override
-	public boolean emailAuth(String uuid) {
+	public ServiceResult emailAuth(String uuid) {
 
 		Optional<User> optionalUser = userRepository.findByEmailAuthKey(uuid);
 		if (!optionalUser.isPresent()) {
-			return false;
+			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
 		}
 
 		User user = optionalUser.get();
 
 		if (user.isEmailAuthYn()) {
-			return false;
+			return new ServiceResult(false, "이미 활성화 된 계정 입니다.");
 		}
 
 		user.setEmailAuthYn(true);
@@ -91,16 +97,16 @@ public class UserServiceImpl implements UserService {
 		user.setEmailAuthDt(LocalDateTime.now());
 
 		userRepository.save(user);
-		return true;
+		return new ServiceResult();
 	}
 
 	@Override
-	public boolean sendResetPassword(ResetPasswordInput parameter) {
+	public ServiceResult sendResetPassword(ResetPasswordInput parameter) {
 
 		Optional<User> optionalUser = userRepository.findByUserIdAndUserName(
 							parameter.getUserId(), parameter.getUserName());
 		if (!optionalUser.isPresent()) {
-			throw new UsernameNotFoundException("회원 정보가 존재하지 않습니다.");
+			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
 		}
 
 		User user = optionalUser.get();
@@ -118,54 +124,55 @@ public class UserServiceImpl implements UserService {
 			+ uuid + "'> 비밀번호 초기화 링크 </a></div>";
 		mailComponents.sendMail(email, subject, text);
 
-		return true;
+		return new ServiceResult();
 	}
 
 	@Override
-	public boolean resetPassword(String uuid, String password) {
+	public ServiceResult resetPassword(String uuid, String password) {
 
 		Optional<User> optionalUser = userRepository.findByResetPasswordKey(uuid);
 		if (!optionalUser.isPresent()) {
-			throw new UsernameNotFoundException("회원 정보가 존재하지 않습니다.");
+			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
 		}
 
 		User user = optionalUser.get();
 
 		// 초기화 날짜 유효성 체크
 		if (user.getResetPasswordLimitDt() == null) {
-			throw new RuntimeException("유호한 날짜가 아닙니다.");
+			return new ServiceResult(false,"유효한 날짜가 아닙니다.");
 		}
 		if (user.getResetPasswordLimitDt().isBefore(LocalDateTime.now())) {
-			throw new RuntimeException("유효한 날짜가 아닙니다.");
+			return new ServiceResult(false,"유효한 날짜가 아닙니다.");
 		}
 
-		String encPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+		String encPassword = PasswordUtils.encPassword(password);
 		user.setPassword(encPassword);
 		user.setResetPasswordKey("");
 		user.setResetPasswordLimitDt(null);
 		userRepository.save(user);
 
-		return true;
+		return new ServiceResult();
 	}
 
 	@Override
-	public boolean checkResetPassword(String uuid) {
+	public ServiceResult checkResetPassword(String uuid) {
 		Optional<User> optionalUser = userRepository.findByResetPasswordKey(uuid);
 		if (!optionalUser.isPresent()) {
-			return false;
+			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
 		}
+
 
 		User user = optionalUser.get();
 
 		// 초기화 날짜 유효성 체크
 		if (user.getResetPasswordLimitDt() == null) {
-			throw new RuntimeException("유호한 날짜가 아닙니다.");
+			return new ServiceResult(false,"유효한 날짜가 아닙니다.");
 		}
 		if (user.getResetPasswordLimitDt().isBefore(LocalDateTime.now())) {
-			throw new RuntimeException("유효한 날짜가 아닙니다.");
+			return new ServiceResult(false,"유효한 날짜가 아닙니다.");
 		}
 
-		return true;
+		return new ServiceResult();
 	}
 
 	@Override
@@ -197,28 +204,27 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean updateStatus(String userId, String userStatus) {
+	public ServiceResult updateStatus(String userId, String userStatus) {
 
 		Optional<User> optionalUser = userRepository.findById(userId);
 
 		if (!optionalUser.isPresent()) {
-			throw new UsernameNotFoundException("회원 정보가 존재하지 않습니다.");
+			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
 		}
 
 		User user = optionalUser.get();
 		user.setUserStatus(userStatus);
 		userRepository.save(user);
 
-		return true;
+		return new ServiceResult();
 	}
 
 	@Override
-	public boolean updatePassword(String userId, String password) {
+	public ServiceResult updatePassword(String userId, String password) {
 
 		Optional<User> optionalUser = userRepository.findById(userId);
-
 		if (!optionalUser.isPresent()) {
-			throw new UsernameNotFoundException("회원 정보가 존재하지 않습니다.");
+			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
 		}
 
 		User user = optionalUser.get();
@@ -228,7 +234,83 @@ public class UserServiceImpl implements UserService {
 		user.setPassword(encPassword);
 		userRepository.save(user);
 
-		return true;
+		return new ServiceResult();
+	}
+
+	@Override
+	public ServiceResult updateUser(UserInput parameter) {
+
+		String userId = parameter.getUserId();
+		Optional<User> optionalUser = userRepository.findById(userId);
+		if (!optionalUser.isPresent()) {
+			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
+		}
+
+		User user = optionalUser.get();
+
+		user.setPhoneNumber(parameter.getPhoneNumber());
+		user.setZipcode(parameter.getZipcode());
+		user.setAddr(parameter.getAddr());
+		user.setAddrDetail(parameter.getAddrDetail());
+		user.setUdtDt(LocalDateTime.now());
+		userRepository.save(user);
+
+		return new ServiceResult();
+	}
+
+	@Override
+	public ServiceResult updateUserPassword(UserInput parameter) {
+
+		String userId = parameter.getUserId();
+		Optional<User> optionalUser = userRepository.findById(userId);
+		if (!optionalUser.isPresent()) {
+			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
+		}
+
+		User user = optionalUser.get();
+		if (!PasswordUtils.equals(parameter.getPassword(), user.getPassword())) {
+			return new ServiceResult(false, "비밀번호가 일치하지 않습니다.");
+		}
+
+		String encPassword = PasswordUtils.encPassword(parameter.getNewPassword());
+		user.setPassword(encPassword);
+		userRepository.save(user);
+
+		return new ServiceResult();
+	}
+
+	@Override
+	public ServiceResult withdraw(String userId, String password) {
+
+		Optional<User> optionalUser = userRepository.findById(userId);
+		if (!optionalUser.isPresent()) {
+			throw new UsernameNotFoundException("회원 정보가 존재하지 않습니다.");
+		}
+
+		User user = optionalUser.get();
+
+		if (!PasswordUtils.equals(password, user.getPassword())) {
+			return new ServiceResult(false, "비밀번호가 일치하지 않습니다.");
+		}
+
+		user.setUserName("탈퇴회원");
+		user.setPhoneNumber("");
+		user.setPassword("");
+		user.setRegDt(null);
+		user.setUdtDt(null);
+		user.setEmailAuthYn(false);
+		user.setEmailAuthDt(null);
+		user.setEmailAuthKey("");
+		user.setResetPasswordKey("");
+		user.setResetPasswordLimitDt(null);
+		user.setUserStatus(UserCode.USER_STATUS_WITHDRAW);
+		user.setZipcode("");
+		user.setAddr("");
+		user.setAddrDetail("");
+
+		userRepository.save(user);
+
+		return new ServiceResult();
 	}
 
 	@Override
@@ -248,6 +330,10 @@ public class UserServiceImpl implements UserService {
 
 		if (User.USER_STATUS_STOP.equals(user.getUserStatus())) {
 			throw new StopUserException("정지된 회원입니다.");
+		}
+
+		if (User.USER_STATUS_WITHDRAW.equals(user.getUserStatus())) {
+			throw new StopUserException("탈퇴 회원입니다.");
 		}
 
 		List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
