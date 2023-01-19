@@ -37,6 +37,12 @@
         </td>
       </tr>
       <tr>
+        <th>닉네임</th>
+        <td>
+          <p th:text="${user.nickname}"></p>
+        </td>
+      </tr>
+      <tr>
         <th>연락처</th>
         <td>
           <p th:text="${user.phoneNumber}"></p>
@@ -139,6 +145,8 @@
       </tr>
       </tbody>
     </table>
+  </div>
+  <div class="pager" th:utext="${pager}">
   </div>
 </body>
 </html>

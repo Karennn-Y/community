@@ -15,7 +15,7 @@ public class PasswordUtils {
    }
 
    public static String encPassword(String plainText) {
-       if (plainText != null || plainText.length() < 1)  {
+       if (plainText == null || plainText.length() < 1)  {
            return "";
        }
        return BCrypt.hashpw(plainText, BCrypt.gensalt());

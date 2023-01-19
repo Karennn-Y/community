@@ -22,7 +22,9 @@ public class LoginHistoryDto {
     String clientIp;
     LocalDateTime loginDt;
 
-    Long seq;
+    // indexing 위한 추가컬럼
+    long totalCount;
+    long seq; // sequence 처리
 
 
     public static List<LoginHistoryDto> of (List<LoginHistory> loginHistories) {

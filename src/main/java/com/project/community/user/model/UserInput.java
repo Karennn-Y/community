@@ -7,6 +7,7 @@ public class UserInput {
 
 	private String userId;
 	private String userName;
+	private String nickname;
 	private String password;
 	private String phoneNumber;
 

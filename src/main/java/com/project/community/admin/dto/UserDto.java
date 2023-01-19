@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class UserDto {
 
 	String userId;
-
+	String nickname;
 	String userName;
 	String phoneNumber;
 	String password;
@@ -52,6 +52,7 @@ public class UserDto {
 		return UserDto.builder()
 			.userId(user.getUserId())
 			.userName(user.getUserName())
+			.nickname(user.getNickname())
 			.phoneNumber(user.getPhoneNumber())
 			.regDt(user.getRegDt())
 			.udtDt(user.getUdtDt())

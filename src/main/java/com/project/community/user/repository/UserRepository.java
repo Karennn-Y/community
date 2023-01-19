@@ -13,4 +13,5 @@ public interface UserRepository extends JpaRepository<User, String> {
 
 	// 비밀번호 초기화시 uuid값으로 찾기
 	Optional<User> findByResetPasswordKey(String resetPasswordKey);
+
 }

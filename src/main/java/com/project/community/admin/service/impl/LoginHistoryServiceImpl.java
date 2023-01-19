@@ -32,17 +32,8 @@ public class LoginHistoryServiceImpl implements LoginHistoryService {
 
     @Override
     public List<LoginHistoryDto> list(LoginHistoryParam parameter) {
-        long totalCount = loginHistoryMapper.selectListCount(parameter);
 
-        List<LoginHistoryDto> list = loginHistoryMapper.selectList(parameter);
-        if (!CollectionUtils.isEmpty(list)) {
-            int i = 0;
-            for (LoginHistoryDto x : list) {
-                x.setSeq(totalCount - parameter.getPageStart() - i);
-                i++;
-            }
-        }
-        return list;
+        return loginHistoryMapper.selectList(parameter);
     }
 
 }

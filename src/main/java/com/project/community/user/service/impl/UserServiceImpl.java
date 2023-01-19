@@ -54,6 +54,7 @@ public class UserServiceImpl implements UserService {
 		User user = User.builder()
 				.userId(parameter.getUserId())
 				.userName(parameter.getUserName())
+				.nickname(parameter.getNickname())
 				.phoneNumber(parameter.getPhoneNumber())
 				.password(encPassword)
 				.zipcode(parameter.getZipcode())
@@ -248,6 +249,7 @@ public class UserServiceImpl implements UserService {
 
 		User user = optionalUser.get();
 
+		user.setNickname(parameter.getNickname());
 		user.setPhoneNumber(parameter.getPhoneNumber());
 		user.setZipcode(parameter.getZipcode());
 		user.setAddr(parameter.getAddr());
@@ -294,6 +296,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		user.setUserName("탈퇴회원");
+		user.setNickname("");
 		user.setPhoneNumber("");
 		user.setPassword("");
 		user.setRegDt(null);

@@ -14,4 +14,6 @@ public interface CategoryService {
     boolean del(long id);
     // 카테고리 목록
     List<CategoryDto> list();
+    // 사용자 카테고리 목록
+    List<CategoryDto> frontList(CategoryDto categoryDto);
 }

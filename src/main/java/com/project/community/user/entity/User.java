@@ -19,6 +19,7 @@ public class User implements UserCode {
 	private String userId;
 
 	private String userName;
+	private String nickname;
 	private String phoneNumber;
 	private String password;
 	private LocalDateTime regDt;
