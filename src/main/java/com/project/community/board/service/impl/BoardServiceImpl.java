@@ -59,6 +59,24 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
+	public boolean set(BoardInput parameter) {
+
+		Optional<Board> optionalBoard = boardRepository.findById(parameter.getId());
+		if (!optionalBoard.isPresent()) {
+			return false;
+		}
+		Board board = optionalBoard.get();
+
+		board.setSubject(parameter.getSubject());
+		board.setContents(parameter.getContents());
+		board.setUdtDt(LocalDateTime.now());
+
+		boardRepository.save(board);
+
+		return true;
+	}
+
+	@Override
 	public List<BoardDto> list(BoardParam parameter) {
 
 		long totalCount = boardMapper.selectListCount(parameter);
@@ -73,5 +91,98 @@ public class BoardServiceImpl implements BoardService {
 			}
 		}
 		return list;
+	}
+
+	@Override
+	public List<BoardDto> adminList(BoardParam parameter) {
+
+		long totalCount = boardMapper.selectListCountAdmin(parameter);
+
+		List<BoardDto> list = boardMapper.selectListAdmin(parameter);
+		if (!CollectionUtils.isEmpty(list)) {
+			int i = 0;
+			for (BoardDto x : list) {
+				x.setTotalCount(totalCount);
+				x.setSeq(totalCount - parameter.getPageStart() - i);
+				i++;
+			}
+		}
+		return list;
+	}
+
+	@Override
+	public BoardDto detail(long id) {
+		Optional<Board> optionalBoard = boardRepository.findById(id);
+		if (!optionalBoard.isPresent()) {
+			return null;
+		}
+		Board board = optionalBoard.get();
+
+		return BoardDto.of(board);
+	}
+
+	@Override
+	public boolean del(String idList) {
+		if (idList != null && idList.length() > 0) {
+			String[] ids = idList.split(",");
+			for (String x : ids) {
+				long id = 0L;
+				try	{
+					id = Long.parseLong(x);
+				} catch (Exception e) {
+				}
+				if (id > 0) {
+					boardRepository.deleteById(id);
+				}
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public List<BoardDto> userList(BoardParam parameter) {
+
+		long totalCount = boardMapper.selectListCountUser(parameter);
+
+		List<BoardDto> list = boardMapper.selectListUser(parameter);
+
+		if (!CollectionUtils.isEmpty(list)) {
+			int i = 0;
+			for (BoardDto x : list) {
+				x.setTotalCount(totalCount);
+				x.setSeq(totalCount - parameter.getPageStart() - i);
+				i++;
+			}
+		}
+		return list;
+	}
+
+	@Override
+	public boolean userDEL(String idList) {
+
+		if (idList != null && idList.length() > 0) {
+			String[] ids = idList.split(",");
+			for (String x : ids) {
+				long id = 0L;
+				try	{
+					id = Long.parseLong(x);
+				} catch (Exception e) {
+				}
+				if (id > 0) {
+					boardRepository.deleteById(id);
+				}
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public BoardDto getById(long id) {
+		return boardRepository.findById(id).map(BoardDto::of).orElse(null);
+	}
+
+	@Override
+	public String getUserId(BoardDto existBoard) {
+		return existBoard.getUserId();
 	}
 }

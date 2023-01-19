@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>게시판 상세</title>
+  <title>관리자 게시판 상세</title>
   <style>
     .title {
       border-radius: 25px;
@@ -65,7 +65,7 @@
 
 </head>
 <body>
-<div th:replace="/fragments/layout.html :: fragment-body-menu">
+<div th:replace="/fragments/layout.html :: fragment-admin-menu">
 </div>
 <h1>게시판</h1>
 
@@ -75,7 +75,8 @@
 </div>
 <div style="text-align: right;">
   <p>게시일: <span th:text="${detail.regDtText}"></span></p>
-  <p>작성자: <span th:text="${detail.nickname}"></span></p>
+  <p>작성자 닉네임: <span th:text="${detail.nickname}"></span></p>
+  <p>작성자 아이디: <span th:text="${detail.userId}"></span></p>
 </div>
 <hr/>
 <br/>
@@ -84,7 +85,7 @@
 <br/>
 <hr/>
 <div style="text-align: center">
-  <a href="/board/list">목록</a>
+  <a href="/admin/board/list.do">목록</a>
 </div>
 
 </body>

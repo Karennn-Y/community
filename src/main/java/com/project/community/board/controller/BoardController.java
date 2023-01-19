@@ -11,6 +11,8 @@ import com.project.community.board.service.BoardService;
 import com.project.community.common.controller.BaseController;
 import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
+import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,19 +48,63 @@ public class BoardController extends BaseController {
 		return "board/list";
 	}
 
-	@GetMapping("/board/add")
-	public String add(Model model) {
+	@GetMapping(value = {"/board/add", "/user/posts/edit/{id}"})
+	public String add(Model model, HttpServletRequest request, BoardInput parameter, Principal principal) {
+		String loginId = principal.getName();
+		boolean editMode = request.getRequestURI().contains("/edit");
+		BoardDto detail = new BoardDto();
+
+		if (editMode) {
+			long id = parameter.getId();
+			BoardDto existBoard = boardService.getById(id);
+			String userId = boardService.getUserId(existBoard);
+			if (existBoard == null) {
+				model.addAttribute("message", "게시글 정보가 존재하지 않습니다");
+				return "common/error";
+			}
+			if (!Objects.equals(userId, loginId)) {
+				model.addAttribute("message", "본인의 게시글만 수정할 수 있습니다.");
+				return "common/error";
+			}
+			detail = existBoard;
+		}
+		model.addAttribute("detail", detail);
+		model.addAttribute("editMode", editMode);
 		model.addAttribute("category", categoryService.frontList(CategoryDto.builder().build()));
 		return "board/add";
 	}
 
-	@PostMapping("/board/add")
-	public String addSubmit(Model model, Principal principal, BoardInput parameter) {
-
-		parameter.setUserId(principal.getName());
+	@PostMapping(value = {"/board/add", "/user/posts/edit/{id}"})
+	public String addSubmit(Model model, HttpServletRequest request, Principal principal, BoardInput parameter) {
+		String loginId = principal.getName();
+		boolean editMode = request.getRequestURI().contains("/edit");
+		if (editMode) {
+			long id = parameter.getId();
+			BoardDto existBoard = boardService.getById(id);
+			String userId = boardService.getUserId(existBoard);
+			if (existBoard == null) {
+				model.addAttribute("message", "게시글 정보가 존재하지 않습니다");
+				return "common/error";
+			}
+			if (!Objects.equals(userId, loginId)) {
+				model.addAttribute("message", "본인의 게시글만 수정할 수 있습니다.");
+				return "common/error";
+			}
+			boolean result = boardService.set(parameter);
+		}
+		parameter.setUserId(loginId);
 		boolean result = boardService.add(parameter);
 
 		return "redirect:/board/list";
+	}
+
+	@GetMapping("/board/{id}")
+	public String detail (Model model, BoardParam parameter) {
+
+		BoardDto board = boardService.detail(parameter.getId());
+		model.addAttribute("detail", board);
+
+		return "board/detail";
 	}
 
 }

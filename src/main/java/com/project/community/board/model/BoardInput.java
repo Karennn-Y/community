@@ -14,4 +14,7 @@ public class BoardInput {
 	String contents;
 	String regDt;
 
+	// for delete
+	String idList;
+
 }

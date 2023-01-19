@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.community.board.mapper.BoardMapper">
+
+  <sql id="selectListWhereAdmin">
+
+    <if test="searchType != null and searchValue != null">
+      <choose>
+        <when test="searchType == 'subject'">
+          and subject like concat('%', #{searchValue}, '%')
+        </when>
+        <when test="searchType == 'contents'">
+          and contents like concat('%', #{searchValue}, '%')
+        </when>
+        <when test="searchType == 'nickname'">
+          and nickname like concat('%', #{searchValue}, '%')
+        </when>
+        <when test="searchType == 'userId'">
+          and user_id like concat('%', #{searchValue}, '%')
+        </when>
+        <otherwise>
+          and
+          (
+          subject like concat('%', #{searchValue}, '%')
+          or
+          contents like concat('%', #{searchValue}, '%')
+          or
+          nickname like concat('%', #{searchValue}, '%')
+          or
+          user_id like concat('%', #{searchValue}, '%')
+          )
+        </otherwise>
+      </choose>
+    </if>
+
+  </sql>
+
+  <sql id="selectListWhere">
+
+    <if test="searchType != null and searchValue != null">
+      <choose>
+        <when test="searchType == 'subject'">
+          and subject like concat('%', #{searchValue}, '%')
+        </when>
+        <when test="searchType == 'contents'">
+          and contents like concat('%', #{searchValue}, '%')
+        </when>
+        <when test="searchType == 'nickname'">
+          and nickname like concat('%', #{searchValue}, '%')
+        </when>
+        <otherwise>
+          and
+          (
+          subject like concat('%', #{searchValue}, '%')
+          or
+          contents like concat('%', #{searchValue}, '%')
+          or
+          nickname like concat('%', #{searchValue}, '%')
+          )
+        </otherwise>
+      </choose>
+    </if>
+
+  </sql>
+
+
+
+  <select id="selectListCount" resultType="long">
+
+    select count(*)
+    from board
+    where 1 = 1
+      <include refid="selectListWhere"/>
+
+  </select>
+
+  <select id="selectListCountAdmin" resultType="long">
+
+    select count(*)
+    from board
+    where 1 = 1
+    <include refid="selectListWhereAdmin"/>
+
+  </select>
+
+  <select id="selectList"
+    resultType="com.project.community.board.dto.BoardDto">
+
+    select *
+    from Board
+    where 1 = 1
+      <include refid="selectListWhere"/>
+    order by reg_dt desc
+
+    limit #{pageStart}, #{pageEnd}
+
+  </select>
+
+  <select id="selectListAdmin"
+    resultType="com.project.community.board.dto.BoardDto">
+
+    select *
+    from Board
+    where 1 = 1
+    <include refid="selectListWhereAdmin"/>
+    order by reg_dt desc
+
+    limit #{pageStart}, #{pageEnd}
+
+  </select>
+
+  <select id="selectListCountUser" resultType="long">
+
+    select count(*)
+    from board
+    where user_id = #{userId}
+
+  </select>
+
+  <select id="selectListUser"
+    resultType="com.project.community.board.dto.BoardDto">
+
+    select *
+    from Board
+    where user_id = #{userId}
+    order by reg_dt desc
+
+    limit #{pageStart}, #{pageEnd}
+
+  </select>
+
+
+</mapper>
