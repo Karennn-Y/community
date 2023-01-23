@@ -2,11 +2,11 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>관리자 페이지</title>
+  <title>관리자 게시판</title>
   <style>
     .list table {
-      width: 100%;
       border-collapse: collapse;
+      width: 100%;
     }
     .list table th, .list table td {
       padding: 8px;
@@ -19,9 +19,6 @@
     p.nothing {
       text-align: center;
       padding: 100px;
-    }
-    .inline-div {
-      display: inline-block;
     }
     .pager {
       margin-top: 20px;
@@ -48,6 +45,17 @@
       position: absolute;
       top: 0;
       right: 0;
+    }
+    .search-form {
+      position: relative;
+      padding: 5px 0 10px 0;
+      text-align: right;
+    }
+    .search-form .total-count {
+      position: absolute;
+      left: 0; top: 0;
+      height: 20px;
+      float: left;
     }
   </style>
   <script src="https://code.jquery.com/jquery-3.6.2.min.js" integrity="sha256-2krYZKh//PcchRtd+H+VyyQoZ/e3EcrkxhM8ycwASPA=" crossorigin="anonymous"></script>
@@ -90,28 +98,23 @@
 </head>
 <body>
 <div th:replace="/fragments/layout.html :: fragment-admin-menu">
-<h1>관리자 공지사항 페이지</h1>
+</div>
 
-  </div>
-
-
+<h1>댓글 목록</h1>
 
 <div class="list">
   <div class="buttons">
-    <p class="total-count">전체 <span th:text="${totalCount}"></span> 개</p>
-    <a href="/admin/announcement/add.do"> 공지사항 등록 </a>
     <button id="deleteButton" type="button"> 선택 삭제</button>
-    <hr/>
   </div>
+
   <table>
     <thead>
     <tr>
       <th>
         <input id="selectAll" type="checkbox"/>
       </th>
-      <th>ID</th>
-      <th>제목</th>
-      <th>작성일</th>
+      <th>댓글</th>
+      <th>작성자</th>
       <th>게시일</th>
     </tr>
     </thead>
@@ -120,15 +123,9 @@
       <td>
         <input type="checkbox" th:value="${x.id}"/>
       </td>
-      <td th:text="${x.seq}"> 1 </td>
-      <td>
-        <p>
-          <a th:href="'edit.do?id=' + ${x.id}"
-             th:text="${x.subject}">강좌명</a>
-        </p>
-      </td>
+      <td th:text="${x.contents}"></td>
+      <td th:text="${x.nickname}"></td>
       <td th:text="${x.regDtText}"></td>
-      <td th:text="${x.postDtText}"></td>
     </tr>
     <tr th:if="${#lists.isEmpty(list)}">
       <td colspan="4">
@@ -141,7 +138,7 @@
   </div>
 </div>
 
-<form name="deleteForm" method="post" action="/admin/announcement/delete.do">
+<form name="deleteForm" method="post" action="/admin/board/comment/delete.do">
   <input type="hidden" name="idList"/>
 </form>
 

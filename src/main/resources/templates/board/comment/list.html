@@ -2,17 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>관리자 게시판 상세</title>
+  <title>게시판</title>
   <style>
-    .title {
-      border-radius: 25px;
-      border: 2px solid grey;
-      padding: 20px;
-      width: 97%;
-      height: 50px;
-      text-align: center;
-    }
-
     .list table {
       border-collapse: collapse;
       width: 100%;
@@ -55,6 +46,17 @@
       top: 0;
       right: 0;
     }
+    .search-form {
+      position: relative;
+      padding: 5px 0 10px 0;
+      text-align: right;
+    }
+    .search-form .total-count {
+      position: absolute;
+      left: 0; top: 0;
+      height: 20px;
+      float: left;
+    }
   </style>
   <script src="https://code.jquery.com/jquery-3.6.2.min.js" integrity="sha256-2krYZKh//PcchRtd+H+VyyQoZ/e3EcrkxhM8ycwASPA=" crossorigin="anonymous"></script>
   <script>
@@ -65,30 +67,46 @@
 
 </head>
 <body>
-<div th:replace="/fragments/layout.html :: fragment-admin-menu">
+<div th:replace="/fragments/layout.html :: fragment-body-menu">
 </div>
-<h1>게시판</h1>
 
+<h1>
+  <a href="/board/list">댓글 목록</a>
+</h1>
+<div th:replace="/fragments/layout.html :: fragment-board-menu">
+</div>
 
-<div class="title" style="text-align: center">
-  <h3 th:text="${detail.subject}">제목</h3>
-</div>
-<div style="text-align: left">
-  <a th:href="'/admin/board/comment?boardId=' + ${detail.id}" target="_blank">댓글</a>
-</div>
-<div style="text-align: right;">
-  <p>게시일: <span th:text="${detail.regDtText}"></span></p>
-  <p>작성자 닉네임: <span th:text="${detail.nickname}"></span></p>
-  <p>작성자 아이디: <span th:text="${detail.userId}"></span></p>
-</div>
-<hr/>
+<div class="list">
+  <div class="buttons">
+    <a th:href="'/board/comment/add?boardId=' + ${boardId}"> 댓글 등록 </a>
+  </div>
+  <div class="search-form">
+    <p class="total-count">전체 <span th:text="${totalCount}"></span> 개</p>
+  </div>
 <br/>
-<div th:utext="${detail.contents}"></div>
-
-<br/>
-<hr/>
-<div style="text-align: center">
-  <a href="/admin/board/list.do">목록</a>
+  <table>
+    <thead>
+    <tr>
+      <th>내용</th>
+      <th>작성자</th>
+      <th>게시일</th>
+    </tr>
+    </thead>
+    <tbody id="dataList">
+    <tr th:each="x : ${list}">
+      <td th:text="${x.contents}"></td>
+      <td th:text="${x.nickname}"></td>
+      <td th:text="${x.regDtText}"></td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(list)}">
+      <td colspan="4">
+        <p class="nothing">댓글이 없습니다.</p>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <div class="pager" th:utext="${pager}">
+  </div>
 </div>
 
 </body>

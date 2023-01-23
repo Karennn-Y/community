@@ -4,7 +4,8 @@ import com.project.community.admin.dto.UserDto;
 import com.project.community.admin.mapper.UserMapper;
 import com.project.community.admin.model.UserParam;
 import com.project.community.component.MailComponents;
-import com.project.community.main.service.ServiceResult;
+import com.project.community.exception.CustomException;
+import com.project.community.exception.ExceptionCode;
 import com.project.community.user.entity.User;
 import com.project.community.user.entity.UserCode;
 import com.project.community.user.exception.StopUserException;
@@ -37,13 +38,13 @@ public class UserServiceImpl implements UserService {
 	private final UserMapper userMapper;
 
 	@Override
-	public ServiceResult register(UserInput parameter) {
+	public boolean register(UserInput parameter) {
 
 		Optional<User> optionalUser = userRepository.findById(parameter.getUserId());
 
 		// id 회원가입 여부 조회(동일 id 있을 경우 return false)
 		if (optionalUser.isPresent()) {
-			return new ServiceResult(false,"이미 가입된 아이디 입니다.");
+			throw new CustomException(ExceptionCode.ALREADY_EXIST_ID);
 		}
 
 		String encPassword = PasswordUtils.encPassword(parameter.getPassword());
@@ -76,21 +77,20 @@ public class UserServiceImpl implements UserService {
 
 		mailComponents.sendMail(email, subject, text);
 
-		return new ServiceResult();
+		return true;
 	}
 
 	@Override
-	public ServiceResult emailAuth(String uuid) {
-
+	public boolean emailAuth(String uuid) {
 		Optional<User> optionalUser = userRepository.findByEmailAuthKey(uuid);
 		if (!optionalUser.isPresent()) {
-			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
+			throw new CustomException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
 		User user = optionalUser.get();
 
 		if (user.isEmailAuthYn()) {
-			return new ServiceResult(false, "이미 활성화 된 계정 입니다.");
+			throw new CustomException(ExceptionCode.ALREADY_AUTHORIZED_ACCOUNT);
 		}
 
 		user.setEmailAuthYn(true);
@@ -98,16 +98,16 @@ public class UserServiceImpl implements UserService {
 		user.setEmailAuthDt(LocalDateTime.now());
 
 		userRepository.save(user);
-		return new ServiceResult();
+		return true;
 	}
 
 	@Override
-	public ServiceResult sendResetPassword(ResetPasswordInput parameter) {
+	public boolean sendResetPassword(ResetPasswordInput parameter) {
 
 		Optional<User> optionalUser = userRepository.findByUserIdAndUserName(
 							parameter.getUserId(), parameter.getUserName());
 		if (!optionalUser.isPresent()) {
-			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
+			throw new CustomException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
 		User user = optionalUser.get();
@@ -125,25 +125,26 @@ public class UserServiceImpl implements UserService {
 			+ uuid + "'> 비밀번호 초기화 링크 </a></div>";
 		mailComponents.sendMail(email, subject, text);
 
-		return new ServiceResult();
+		return true;
 	}
 
 	@Override
-	public ServiceResult resetPassword(String uuid, String password) {
+	public boolean resetPassword(String uuid, String password) {
 
 		Optional<User> optionalUser = userRepository.findByResetPasswordKey(uuid);
 		if (!optionalUser.isPresent()) {
-			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
+			throw new CustomException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
 		User user = optionalUser.get();
 
 		// 초기화 날짜 유효성 체크
 		if (user.getResetPasswordLimitDt() == null) {
-			return new ServiceResult(false,"유효한 날짜가 아닙니다.");
+			throw new CustomException(ExceptionCode.DATE_IS_NOT_VALID);
+
 		}
 		if (user.getResetPasswordLimitDt().isBefore(LocalDateTime.now())) {
-			return new ServiceResult(false,"유효한 날짜가 아닙니다.");
+			throw new CustomException(ExceptionCode.DATE_IS_NOT_VALID);
 		}
 
 		String encPassword = PasswordUtils.encPassword(password);
@@ -152,14 +153,14 @@ public class UserServiceImpl implements UserService {
 		user.setResetPasswordLimitDt(null);
 		userRepository.save(user);
 
-		return new ServiceResult();
+		return true;
 	}
 
 	@Override
-	public ServiceResult checkResetPassword(String uuid) {
+	public boolean checkResetPassword(String uuid) {
 		Optional<User> optionalUser = userRepository.findByResetPasswordKey(uuid);
 		if (!optionalUser.isPresent()) {
-			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
+			throw new CustomException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
 
@@ -167,13 +168,11 @@ public class UserServiceImpl implements UserService {
 
 		// 초기화 날짜 유효성 체크
 		if (user.getResetPasswordLimitDt() == null) {
-			return new ServiceResult(false,"유효한 날짜가 아닙니다.");
-		}
+			throw new CustomException(ExceptionCode.DATE_IS_NOT_VALID);		}
 		if (user.getResetPasswordLimitDt().isBefore(LocalDateTime.now())) {
-			return new ServiceResult(false,"유효한 날짜가 아닙니다.");
-		}
+			throw new CustomException(ExceptionCode.DATE_IS_NOT_VALID);		}
 
-		return new ServiceResult();
+		return true;
 	}
 
 	@Override
@@ -205,27 +204,27 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ServiceResult updateStatus(String userId, String userStatus) {
+	public boolean updateStatus(String userId, String userStatus) {
 
 		Optional<User> optionalUser = userRepository.findById(userId);
 
 		if (!optionalUser.isPresent()) {
-			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
+			throw new CustomException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
 		User user = optionalUser.get();
 		user.setUserStatus(userStatus);
 		userRepository.save(user);
 
-		return new ServiceResult();
+		return true;
 	}
 
 	@Override
-	public ServiceResult updatePassword(String userId, String password) {
+	public boolean updatePassword(String userId, String password) {
 
 		Optional<User> optionalUser = userRepository.findById(userId);
 		if (!optionalUser.isPresent()) {
-			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
+			throw new CustomException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
 		User user = optionalUser.get();
@@ -235,16 +234,16 @@ public class UserServiceImpl implements UserService {
 		user.setPassword(encPassword);
 		userRepository.save(user);
 
-		return new ServiceResult();
+		return true;
 	}
 
 	@Override
-	public ServiceResult updateUser(UserInput parameter) {
+	public boolean updateUser(UserInput parameter) {
 
 		String userId = parameter.getUserId();
 		Optional<User> optionalUser = userRepository.findById(userId);
 		if (!optionalUser.isPresent()) {
-			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
+			throw new CustomException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
 		User user = optionalUser.get();
@@ -257,42 +256,42 @@ public class UserServiceImpl implements UserService {
 		user.setUdtDt(LocalDateTime.now());
 		userRepository.save(user);
 
-		return new ServiceResult();
+		return true;
 	}
 
 	@Override
-	public ServiceResult updateUserPassword(UserInput parameter) {
+	public boolean updateUserPassword(UserInput parameter) {
 
 		String userId = parameter.getUserId();
 		Optional<User> optionalUser = userRepository.findById(userId);
 		if (!optionalUser.isPresent()) {
-			return new ServiceResult(false,"회원 정보가 존재하지 않습니다.");
+			throw new CustomException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
 		User user = optionalUser.get();
 		if (!PasswordUtils.equals(parameter.getPassword(), user.getPassword())) {
-			return new ServiceResult(false, "비밀번호가 일치하지 않습니다.");
+			throw new CustomException(ExceptionCode.PASSWORDS_DO_NOT_MATCH);
 		}
 
 		String encPassword = PasswordUtils.encPassword(parameter.getNewPassword());
 		user.setPassword(encPassword);
 		userRepository.save(user);
 
-		return new ServiceResult();
+		return true;
 	}
 
 	@Override
-	public ServiceResult withdraw(String userId, String password) {
+	public boolean withdraw(String userId, String password) {
 
 		Optional<User> optionalUser = userRepository.findById(userId);
 		if (!optionalUser.isPresent()) {
-			throw new UsernameNotFoundException("회원 정보가 존재하지 않습니다.");
+			throw new CustomException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
 		User user = optionalUser.get();
 
 		if (!PasswordUtils.equals(password, user.getPassword())) {
-			return new ServiceResult(false, "비밀번호가 일치하지 않습니다.");
+			throw new CustomException(ExceptionCode.PASSWORDS_DO_NOT_MATCH);
 		}
 
 		user.setUserName("탈퇴회원");
@@ -313,7 +312,7 @@ public class UserServiceImpl implements UserService {
 
 		userRepository.save(user);
 
-		return new ServiceResult();
+		return true;
 	}
 
 	@Override
