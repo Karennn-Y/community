@@ -6,12 +6,11 @@ import com.project.community.board.model.BoardInput;
 import com.project.community.board.model.BoardParam;
 import com.project.community.board.service.BoardService;
 import com.project.community.common.controller.BaseController;
-import com.project.community.main.service.ServiceResult;
+import com.project.community.exception.CustomException;
 import com.project.community.user.model.ResetPasswordInput;
 import com.project.community.user.model.UserInput;
 import com.project.community.user.repository.UserRepository;
 import com.project.community.user.service.UserService;
-import com.project.community.util.PasswordUtils;
 import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
@@ -45,13 +44,14 @@ public class UserController extends BaseController {
 
 	@PostMapping("/user/find/password")
 	public String findPasswordSubmit(Model model, ResetPasswordInput parameter) {
-
-		ServiceResult result = userService.sendResetPassword(parameter);
-		if (!result.isResult()) {
-			model.addAttribute("message", result.getMessage());
+		boolean result;
+		try	{
+			result = userService.sendResetPassword(parameter);
+		} catch (CustomException e) {
+			String message = e.getExceptionCode().getMessage();
+			model.addAttribute("message", message);
 			return "common/error";
 		}
-
 		model.addAttribute("result", result);
 		return "user/find_password_result";
 	}
@@ -64,9 +64,12 @@ public class UserController extends BaseController {
 	@PostMapping("/user/register")
 	public String registerSubmit(Model model, UserInput parameter) {
 
-		ServiceResult result = userService.register(parameter);
-		if (!result.isResult()) {
-			model.addAttribute("message", result.getMessage());
+		boolean result;
+		try	{
+			result = userService.register(parameter);
+		} catch (CustomException e) {
+			String message = e.getExceptionCode().getMessage();
+			model.addAttribute("message", message);
 			return "common/error";
 		}
 		model.addAttribute("result", result);
@@ -77,10 +80,12 @@ public class UserController extends BaseController {
 	public String emailAUTH(Model model, HttpServletRequest request) {
 
 		String uuid = request.getParameter("id");
-
-		ServiceResult result = userService.emailAuth(uuid);
-		if (!result.isResult()) {
-			model.addAttribute("message", result.getMessage());
+		boolean result;
+		try {
+			result = userService.emailAuth(uuid);
+		} catch (CustomException e) {
+			String message = e.getExceptionCode().getMessage();
+			model.addAttribute("message", message);
 			return "common/error";
 		}
 
@@ -106,10 +111,11 @@ public class UserController extends BaseController {
 		String userId = principal.getName();
 		parameter.setUserId(userId);
 
-		ServiceResult result = userService.updateUser(parameter);
-
-		if (!result.isResult()) {
-			model.addAttribute("message", result.getMessage());
+		try {
+			boolean result = userService.updateUser(parameter);
+		} catch (CustomException e) {
+			String message = e.getExceptionCode().getMessage();
+			model.addAttribute("message", message);
 			return "common/error";
 		}
 
@@ -133,10 +139,11 @@ public class UserController extends BaseController {
 
 		String userId = principal.getName();
 		parameter.setUserId(userId);
-		ServiceResult result = userService.updateUserPassword(parameter);
-
-		if (!result.isResult()) {
-			model.addAttribute("message", result.getMessage());
+		try {
+			boolean result = userService.updateUserPassword(parameter);
+		} catch (CustomException e) {
+			String message = e.getExceptionCode().getMessage();
+			model.addAttribute("message", message);
 			return "common/error";
 		}
 
@@ -155,18 +162,17 @@ public class UserController extends BaseController {
 		, Principal principal) {
 
 		String userId = principal.getName();
-
-		ServiceResult result = userService.withdraw(userId, parameter.getPassword());
-
-		if (!result.isResult()) {
-			model.addAttribute("message", result.getMessage());
-			model.addAttribute("url", "");
+		try {
+			boolean result = userService.withdraw(userId, parameter.getPassword());
+		} catch (CustomException e) {
+			String message = e.getExceptionCode().getMessage();
+			model.addAttribute("message", message);
 			return "common/error";
 		}
 		return "redirect:/user/logout";
 	}
 
-
+// 마이페이지 내 게시글 목록
 	@GetMapping("/user/posts")
 	public String userPosts(Model model, Principal principal, BoardParam parameter) {
 
@@ -186,7 +192,7 @@ public class UserController extends BaseController {
 		model.addAttribute("pager", pagerHtml);;
 		return "user/posts";
 	}
-
+	// 마이페이지 내 게시글 삭제
 	@PostMapping("/user/board/delete")
 	public String userDEL(Model model, Principal principal, BoardInput parameter) {
 
@@ -194,12 +200,12 @@ public class UserController extends BaseController {
 
 		if (!Objects.equals(userId, parameter.getUserId())) {
 			model.addAttribute("message", "본인의 게시물만 삭제 가능합니다.");
-			return "error/denied";
+			return "common/error";
 		}
 
 		boolean result = boardService.userDEL(parameter.getIdList());
 
-		return "redirect:/user/board/posts";
+		return "redirect:/user/posts";
 	}
 
 
@@ -207,13 +213,14 @@ public class UserController extends BaseController {
 	public String resetPassword(Model model, HttpServletRequest request) {
 
 		String uuid = request.getParameter("id");
-
-		ServiceResult result = userService.checkResetPassword(uuid);
-		if (!result.isResult()) {
-			model.addAttribute("message", result.getMessage());
+		boolean result;
+		try {
+			result = userService.checkResetPassword(uuid);
+		} catch (CustomException e) {
+			String message = e.getExceptionCode().getMessage();
+			model.addAttribute("message", message);
 			return "common/error";
 		}
-
 		model.addAttribute("result", result);
 		return "user/reset_password";
 	}
@@ -221,12 +228,14 @@ public class UserController extends BaseController {
 	@PostMapping("/user/reset/password")
 	public String resetPasswordSubmit(Model model, ResetPasswordInput parameter) {
 
-		ServiceResult result = userService.resetPassword(parameter.getId(), parameter.getPassword());
-		if (!result.isResult()) {
-			model.addAttribute("message", result.getMessage());
+		boolean result;
+		try{
+			result = userService.resetPassword(parameter.getId(), parameter.getPassword());
+		} catch (CustomException e) {
+			String message = e.getExceptionCode().getMessage();
+			model.addAttribute("message", message);
 			return "common/error";
 		}
-
 		model.addAttribute("result", result);
 		return "user/reset_password_result";
 	}

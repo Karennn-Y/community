@@ -36,6 +36,8 @@ public class BoardServiceImpl implements BoardService {
 		}
 		User user = optionalUser.get();
 		String nickname = user.getNickname();
+		// 관리자인지 아닌지 확인
+		boolean adminYn = user.isAdminYn();
 
 		// 카테고리명 가져오기
 		Optional<Category> optionalCategory = categoryRepository.findById(parameter.getCategoryId());
@@ -45,15 +47,29 @@ public class BoardServiceImpl implements BoardService {
 		Category category = optionalCategory.get();
 		String categoryName = category.getCategoryName();
 
-		Board board = Board.builder()
-			.categoryId(parameter.getCategoryId())
-			.categoryName(categoryName)
-			.subject(parameter.getSubject())
-			.contents(parameter.getContents())
-			.userId(parameter.getUserId())
-			.nickname(nickname)
-			.regDt(LocalDateTime.now())
-			.build();
+		Board board = new Board();
+		if (adminYn) {
+			board = Board.builder()
+				.categoryId(parameter.getCategoryId())
+				.categoryName(categoryName)
+				.subject(parameter.getSubject())
+				.contents(parameter.getContents())
+				.userId(parameter.getUserId())
+				.nickname("관리자")
+				.regDt(LocalDateTime.now())
+				.build();
+
+		} else {
+			board = Board.builder()
+				.categoryId(parameter.getCategoryId())
+				.categoryName(categoryName)
+				.subject(parameter.getSubject())
+				.contents(parameter.getContents())
+				.userId(parameter.getUserId())
+				.nickname(nickname)
+				.regDt(LocalDateTime.now())
+				.build();
+		}
 		boardRepository.save(board);
 		return true;
 	}
