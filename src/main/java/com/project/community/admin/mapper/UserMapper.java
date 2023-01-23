@@ -10,4 +10,5 @@ public interface UserMapper {
 
 	long selectListCount(UserParam parameter);
 	List<UserDto> selectList(UserParam parameter);
+
 }

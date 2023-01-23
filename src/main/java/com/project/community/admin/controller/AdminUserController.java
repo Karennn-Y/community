@@ -51,11 +51,13 @@ public class AdminUserController extends BaseController {
 		, UserParam userParameter
 		, LoginHistoryParam historyParameter) {
 
-		userParameter.init();
 		historyParameter.init();
+		userParameter.init();
 
 		UserDto user = userService.detail(userParameter.getUserId());
+
 		List<LoginHistoryDto> logins = loginHistoryService.list(historyParameter);
+
 		model.addAttribute("user", user);
 		model.addAttribute("login", logins);
 

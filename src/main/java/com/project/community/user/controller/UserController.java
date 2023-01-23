@@ -1,6 +1,11 @@
 package com.project.community.user.controller;
 
 import com.project.community.admin.dto.UserDto;
+import com.project.community.board.dto.BoardDto;
+import com.project.community.board.model.BoardInput;
+import com.project.community.board.model.BoardParam;
+import com.project.community.board.service.BoardService;
+import com.project.community.common.controller.BaseController;
 import com.project.community.main.service.ServiceResult;
 import com.project.community.user.model.ResetPasswordInput;
 import com.project.community.user.model.UserInput;
@@ -8,20 +13,25 @@ import com.project.community.user.repository.UserRepository;
 import com.project.community.user.service.UserService;
 import com.project.community.util.PasswordUtils;
 import java.security.Principal;
+import java.util.List;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequiredArgsConstructor
 @Controller
-public class UserController {
+public class UserController extends BaseController {
 
 	private final UserRepository userRepository;
 	private final UserService userService;
+
+	private final BoardService boardService;
 
 	@RequestMapping("/user/login")
 	public String login() {
@@ -158,13 +168,38 @@ public class UserController {
 
 
 	@GetMapping("/user/posts")
-	public String userPosts(Model model, Principal principal) {
+	public String userPosts(Model model, Principal principal, BoardParam parameter) {
 
-		String userId = principal.getName();
-		UserDto detail = userService.detail(userId);
+		parameter.setUserId(principal.getName());
 
-		model.addAttribute("detail", detail);
+		List<BoardDto> list = boardService.userList(parameter);
+		long totalCount = 0;
+		if (!CollectionUtils.isEmpty(list)) {
+			totalCount = list.get(0).getTotalCount();
+		}
+
+		String queryString = parameter.getQueryString();
+		String pagerHtml = getPagerHtml(totalCount, parameter.getPageSize(), parameter.getPageIndex(), queryString);
+
+		model.addAttribute("list", list);
+		model.addAttribute("totalCount", totalCount);
+		model.addAttribute("pager", pagerHtml);;
 		return "user/posts";
+	}
+
+	@PostMapping("/user/board/delete")
+	public String userDEL(Model model, Principal principal, BoardInput parameter) {
+
+		String userId = parameter.getUserId();
+
+		if (!Objects.equals(userId, parameter.getUserId())) {
+			model.addAttribute("message", "본인의 게시물만 삭제 가능합니다.");
+			return "error/denied";
+		}
+
+		boolean result = boardService.userDEL(parameter.getIdList());
+
+		return "redirect:/user/board/posts";
 	}
 
 

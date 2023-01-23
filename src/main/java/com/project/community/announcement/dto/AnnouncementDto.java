@@ -1,14 +1,11 @@
 package com.project.community.announcement.dto;
 
-import com.project.community.admin.dto.LoginHistoryDto;
-import com.project.community.admin.entity.LoginHistory;
 import com.project.community.announcement.entity.Announcement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class AnnouncementDto {
 
 	Long id;
+	long categoryId;
 	String subject;
 	String contents;
 	String registrant;

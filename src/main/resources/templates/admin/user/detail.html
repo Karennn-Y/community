@@ -14,9 +14,10 @@
   </style>
 </head>
 <body>
+<div th:replace="/fragments/layout.html :: fragment-admin-menu">
+</div>
   <h1>관리자 회원 관리 페이지 - 상세 정보</h1>
-  <div th:replace="/fragments/layout.html :: fragment-admin-menu">
-  </div>
+
 
 
 
@@ -34,6 +35,12 @@
         <th>이름</th>
         <td>
           <p th:text="${user.userName}"></p>
+        </td>
+      </tr>
+      <tr>
+        <th>닉네임</th>
+        <td>
+          <p th:text="${user.nickname}"></p>
         </td>
       </tr>
       <tr>
@@ -139,6 +146,8 @@
       </tr>
       </tbody>
     </table>
+  </div>
+  <div class="pager" th:utext="${pager}">
   </div>
 </body>
 </html>

@@ -2,21 +2,23 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>관리자 페이지</title>
+  <title>관리자 게시판</title>
   <style>
     .list table {
-      width: 100%;
       border-collapse: collapse;
+      width: 100%;
     }
     .list table th, .list table td {
-      border:solid 1px #000;
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .list table tbody tr:hover {
+      background-color: darkgray;
     }
     p.nothing {
       text-align: center;
       padding: 100px;
-    }
-    .inline-div {
-      display: inline-block;
     }
     .pager {
       margin-top: 20px;
@@ -43,6 +45,17 @@
       position: absolute;
       top: 0;
       right: 0;
+    }
+    .search-form {
+      position: relative;
+      padding: 5px 0 10px 0;
+      text-align: right;
+    }
+    .search-form .total-count {
+      position: absolute;
+      left: 0; top: 0;
+      height: 20px;
+      float: left;
     }
   </style>
   <script src="https://code.jquery.com/jquery-3.6.2.min.js" integrity="sha256-2krYZKh//PcchRtd+H+VyyQoZ/e3EcrkxhM8ycwASPA=" crossorigin="anonymous"></script>
@@ -85,28 +98,43 @@
 </head>
 <body>
 <div th:replace="/fragments/layout.html :: fragment-admin-menu">
-<h1>관리자 공지사항 페이지</h1>
+</div>
 
-  </div>
-
-
+<h1>
+  <a href="/board/list">게시판 목록</a>
+</h1>
 
 <div class="list">
   <div class="buttons">
-    <p class="total-count">전체 <span th:text="${totalCount}"></span> 개</p>
-    <a href="/admin/announcement/add.do"> 공지사항 등록 </a>
+    <a href="/board/add"> 게시글 등록 </a>
     <button id="deleteButton" type="button"> 선택 삭제</button>
-    <hr/>
   </div>
+  <div class="search-form">
+    <p class="total-count">전체 <span th:text="${totalCount}"></span> 개</p>
+    <form method="get">
+      <select name="searchType">
+        <option value="all">전체</option>
+        <option th:selected="${#strings.equals(param.searchType, 'subject')}" value="subject">제목</option>
+        <option th:selected="${#strings.equals(param.searchType, 'contents')}" value="contents">내용</option>
+        <option th:selected="${#strings.equals(param.searchType, 'nickname')}" value="nickname">닉네임</option>
+        <option th:selected="${#strings.equals(param.searchType, 'userId')}" value="userId">작성자</option>
+      </select>
+
+      <input th:value="${param.searchValue}" type="search" name="searchValue"/>
+      <button type="submit">검색</button>
+    </form>
+  </div>
+
   <table>
     <thead>
     <tr>
       <th>
         <input id="selectAll" type="checkbox"/>
       </th>
-      <th>ID</th>
+      <th>NO</th>
+      <th>카테고리</th>
       <th>제목</th>
-      <th>작성일</th>
+      <th>작성자</th>
       <th>게시일</th>
     </tr>
     </thead>
@@ -116,14 +144,15 @@
         <input type="checkbox" th:value="${x.id}"/>
       </td>
       <td th:text="${x.seq}"> 1 </td>
+      <td th:text="${x.categoryName}"></td>
       <td>
         <p>
-          <a th:href="'edit.do?id=' + ${x.id}"
-             th:text="${x.subject}">강좌명</a>
+          <a th:href="'/admin/board/' + ${x.id} + '.do'"
+             th:text="${x.subject}">제목</a>
         </p>
       </td>
+      <td th:text="${x.nickname}"></td>
       <td th:text="${x.regDtText}"></td>
-      <td th:text="${x.postDtText}"></td>
     </tr>
     <tr th:if="${#lists.isEmpty(list)}">
       <td colspan="4">
@@ -136,7 +165,7 @@
   </div>
 </div>
 
-<form name="deleteForm" method="post" action="/admin/announcement/delete.do">
+<form name="deleteForm" method="post" action="/admin/board/delete.do">
   <input type="hidden" name="idList"/>
 </form>
 

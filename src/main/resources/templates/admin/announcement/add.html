@@ -56,9 +56,9 @@
 
 </head>
 <body>
+<div th:replace="/fragments/layout.html :: fragment-admin-menu">
 <h1 th:if="${editMode}">관리자 공지사항 페이지 - 수정 </h1>
 <h1 th:if="${!editMode}">관리자 공지사항 페이지 - 신규 </h1>
-<div th:replace="/fragments/layout.html :: fragment-admin-menu">
 </div>
 
 <div class="detail">

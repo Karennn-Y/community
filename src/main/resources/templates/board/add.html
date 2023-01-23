@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>게시판 페이지</title>
+  <style>
+    .detail table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .detail table th, .detail table td {
+      border-bottom:solid 1px white;
+    }
+    .detail table th {
+      background-color: lightgray;
+      color: black;
+    }
+    .buttons {
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.2.min.js" integrity="sha256-2krYZKh//PcchRtd+H+VyyQoZ/e3EcrkxhM8ycwASPA=" crossorigin="anonymous"></script>
+  <script>
+    $(document).ready(function () {
+    $('#submitForm').on('submit', function () {
+      // 에디터의 내용이 textarea에 적용된다.
+      oEditors.getById["contents"].exec("UPDATE_CONTENTS_FIELD", []);
+
+    });
+  });
+  </script>
+
+</head>
+
+<body>
+<div th:replace="/fragments/layout.html :: fragment-body-menu"></div>
+
+<h1 th:if="${editMode}"> 게시판 - 게시글 등록 </h1>
+<h1 th:if="${!editMode}"> 게시판 - 게시글 수정 </h1>
+<div class="detail">
+  <form id="submitForm" method="post">
+  <table>
+    <tbody>
+      <tr>
+        <th>
+          제목
+        </th>
+        <td>
+          <input th:value="${detail.subject}" type="text" name="subject" required placeholder="게시글 제목"/>
+        </td>
+      </tr>
+      <tr>
+        <th>
+          카테고리
+        </th>
+        <td>
+          <select name="categoryId" required>
+            <option value="">카테고리 선택</option>
+            <option
+                th:selected="${detail.categoryId == x.id}"
+                th:each="x : ${category}" th:value="${x.id}" th:text="${x.categoryName}"></option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>
+          내용
+        </th>
+        <td>
+          <textarea th:text="${detail.contents}" id="contents" name="contents" cols="70" rows="30" placeholder="내용 입력"></textarea>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="buttons">
+    <button th:if="${editMode}" type="submit"> 게시글 수정 하기 </button>
+    <button th:if="${!editMode}" type="submit"> 게시글 등록 하기 </button>
+    <a href="/user/posts"> 목록 이동 </a>
+  </div>
+  </form>
+</div>
+
+<script type="text/javascript" src="/res/se2/js/service/HuskyEZCreator.js" charset="utf-8"></script>
+<script type="text/javascript">
+  var oEditors = [];
+  nhn.husky.EZCreator.createInIFrame({
+    oAppRef: oEditors,
+    elPlaceHolder: "contents",
+    sSkinURI: "/res/se2/SmartEditor2Skin.html",
+    fCreator: "createSEditor2"
+  });
+</script>
+
+</body>
+</html>
