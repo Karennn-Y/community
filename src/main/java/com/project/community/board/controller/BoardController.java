@@ -5,9 +5,12 @@ import com.project.community.admin.service.CategoryService;
 import com.project.community.announcement.model.AnnouncementParam;
 import com.project.community.announcement.service.AnnouncementService;
 import com.project.community.board.dto.BoardDto;
+import com.project.community.board.mapper.CommentMapper;
 import com.project.community.board.model.BoardInput;
 import com.project.community.board.model.BoardParam;
+import com.project.community.board.model.CommentParam;
 import com.project.community.board.service.BoardService;
+import com.project.community.board.service.CommentService;
 import com.project.community.common.controller.BaseController;
 import java.security.Principal;
 import java.util.List;
@@ -26,6 +29,7 @@ public class BoardController extends BaseController {
 
 	private final BoardService boardService;
 	private final CategoryService categoryService;
+	private final CommentMapper commentMapper;
 
 	@GetMapping("/board/list")
 	public String list(Model model, BoardParam parameter) {
@@ -102,8 +106,12 @@ public class BoardController extends BaseController {
 	public String detail (Model model, BoardParam parameter) {
 
 		BoardDto board = boardService.detail(parameter.getId());
-		model.addAttribute("detail", board);
+		CommentParam commentParameter = new CommentParam();
+		commentParameter.setBoardId(parameter.getId());
+		long totalCount = commentMapper.selectListCount(commentParameter);
 
+		model.addAttribute("detail", board);
+		model.addAttribute("count", totalCount);
 		return "board/detail";
 	}
 

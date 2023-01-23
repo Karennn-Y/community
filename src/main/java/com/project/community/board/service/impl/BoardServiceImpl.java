@@ -9,6 +9,8 @@ import com.project.community.board.model.BoardInput;
 import com.project.community.board.model.BoardParam;
 import com.project.community.board.repository.BoardRepository;
 import com.project.community.board.service.BoardService;
+import com.project.community.exception.CustomException;
+import com.project.community.exception.ExceptionCode;
 import com.project.community.user.entity.User;
 import com.project.community.user.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -32,7 +34,7 @@ public class BoardServiceImpl implements BoardService {
 		// 닉네임 가져오기
 		Optional<User> optionalUser = userRepository.findById(parameter.getUserId());
 		if (!optionalUser.isPresent()) {
-			return false;
+			throw new CustomException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 		User user = optionalUser.get();
 		String nickname = user.getNickname();
@@ -42,12 +44,12 @@ public class BoardServiceImpl implements BoardService {
 		// 카테고리명 가져오기
 		Optional<Category> optionalCategory = categoryRepository.findById(parameter.getCategoryId());
 		if (!optionalCategory.isPresent()) {
-			return false;
+			throw new CustomException(ExceptionCode.CATEGORY_IS_NOT_EXIST);
 		}
 		Category category = optionalCategory.get();
 		String categoryName = category.getCategoryName();
 
-		Board board = new Board();
+		Board board;
 		if (adminYn) {
 			board = Board.builder()
 				.categoryId(parameter.getCategoryId())
